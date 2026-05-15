@@ -1,0 +1,83 @@
+{% extends 'core/base.html' %}
+{% block title %}Ticket – RidePass{% endblock %}
+{% block page_title %}Ticket Detail{% endblock %}
+{% block nav_tickets %}active{% endblock %}
+{% block content %}
+<div style="max-width:420px;margin:0 auto;">
+  <div style="background:linear-gradient(160deg,var(--green-dark),var(--blue));border-radius:20px;padding:2rem;color:white;text-align:center;margin-bottom:1.2rem;">
+    <div style="font-size:12px;opacity:.75;margin-bottom:.3rem;">{{ ticket.route.get_transport_type_display }} Ticket</div>
+    <div style="font-size:1.3rem;font-weight:800;margin-bottom:.3rem;">{{ ticket.route.name }}</div>
+    <div style="font-size:13px;opacity:.8;margin-bottom:1.5rem;">{{ ticket.route.origin }} → {{ ticket.route.destination }}</div>
+
+    <!-- REAL QR CODE IMAGE -->
+    <div style="background:white;border-radius:16px;padding:1.2rem;display:inline-block;margin-bottom:1.2rem;">
+      {% if qr_url %}
+        <img id="qr-img" src="{{ qr_url }}" alt="Ticket QR Code" style="width:160px;height:160px;display:block;">
+      {% endif %}
+      <div style="font-size:11px;color:var(--gray);font-weight:600;margin-top:8px;font-family:monospace;letter-spacing:2px;">{{ ticket.short_code }}</div>
+    </div>
+
+    <div>
+      {% if ticket.status == 'active' %}
+      <span style="background:rgba(58,175,92,.25);color:#6ee89e;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;">✓ Valid – Scan to Board</span>
+      {% elif ticket.status == 'used' %}
+      <span style="background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;">✓ Used</span>
+      {% else %}
+      <span style="background:rgba(239,68,68,.25);color:#fca5a5;padding:6px 18px;border-radius:20px;font-size:13px;font-weight:700;">{{ ticket.status|capfirst }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <table style="width:100%;">
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border:none;">Ticket Code</td><td style="font-weight:700;font-size:13px;text-align:right;font-family:monospace;border:none;">{{ ticket.short_code }}</td></tr>
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">Route</td><td style="font-weight:700;font-size:13px;text-align:right;border-top:1px solid var(--border);">{{ ticket.route.name }}</td></tr>
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">From</td><td style="font-weight:700;font-size:13px;text-align:right;border-top:1px solid var(--border);">{{ ticket.route.origin }}</td></tr>
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">To</td><td style="font-weight:700;font-size:13px;text-align:right;border-top:1px solid var(--border);">{{ ticket.route.destination }}</td></tr>
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">Fare Paid</td><td style="font-weight:800;font-size:15px;color:var(--green);text-align:right;border-top:1px solid var(--border);">₱{{ ticket.fare_paid }}</td></tr>
+        <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">Purchased</td><td style="font-weight:700;font-size:13px;text-align:right;border-top:1px solid var(--border);">{{ ticket.purchased_at|date:"M d, Y g:i A" }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:.75rem;margin-top:1rem;">
+    <a href="{% url 'my_tickets' %}" class="btn btn-outline" style="flex:1;justify-content:center;">← My Tickets</a>
+    {% if ticket.status == 'active' %}
+    <button onclick="downloadQR()" class="btn btn-outline" style="flex:1;justify-content:center;">⬇ Download QR</button>
+    {% endif %}
+    <a href="{% url 'routes' %}" class="btn btn-green" style="flex:1;justify-content:center;">Buy Another</a>
+  </div>
+</div>
+
+<script>
+function downloadQR() {
+  const img = document.getElementById('qr-img');
+  if (!img) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 160;
+  canvas.height = 160;
+  const ctx = canvas.getContext('2d');
+
+  const tempImg = new Image();
+  tempImg.crossOrigin = 'anonymous';
+  tempImg.onload = function() {
+    ctx.drawImage(tempImg, 0, 0, 160, 160);
+    const link = document.createElement('a');
+    link.download = 'RidePass-{{ ticket.short_code }}.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+  tempImg.onerror = function() {
+    // fallback: direct link
+    const link = document.createElement('a');
+    link.href = img.src;
+    link.download = 'RidePass-{{ ticket.short_code }}.png';
+    link.target = '_blank';
+    link.click();
+  };
+  tempImg.src = img.src;
+}
+</script>
+{% endblock %}

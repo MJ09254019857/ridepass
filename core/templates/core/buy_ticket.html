@@ -1,0 +1,112 @@
+{% extends 'core/base.html' %}
+{% block title %}Buy Ticket – RidePass{% endblock %}
+{% block page_title %}Buy Ticket{% endblock %}
+{% block nav_routes %}active{% endblock %}
+{% block content %}
+<div style="max-width:520px;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">🎟️ Ticket Summary</div></div>
+    <div class="card-body">
+
+      <!-- Route Info -->
+      <div style="background:linear-gradient(135deg,var(--green),var(--blue));border-radius:14px;padding:1.5rem;color:white;margin-bottom:1.5rem;">
+        <div style="font-size:11px;opacity:.75;margin-bottom:.3rem;">{{ route.get_transport_type_display }} Route</div>
+        <div style="font-size:1.2rem;font-weight:800;margin-bottom:.5rem;">{{ route.name }}</div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;opacity:.9;margin-bottom:1rem;">
+          <span>{{ route.origin }}</span><span>→</span><span>{{ route.destination }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div><div style="font-size:11px;opacity:.75;">Fare</div><div style="font-size:1.8rem;font-weight:800;">₱{{ route.fare }}</div></div>
+          <div style="text-align:right;"><div style="font-size:11px;opacity:.75;">Duration</div><div style="font-size:16px;font-weight:700;">{{ route.duration_minutes }} min</div></div>
+        </div>
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--dark);">💳 Choose Payment Method</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="payment-methods">
+
+          <div class="pay-method selected" data-method="gcash" onclick="selectMethod(this,'gcash')"
+            style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:2px solid var(--green);background:white;cursor:pointer;transition:all .2s;">
+            <div style="width:38px;height:38px;border-radius:10px;background:#0070e0;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:white;font-weight:900;font-size:14px;">G</span>
+            </div>
+            <div><div style="font-size:13px;font-weight:700;">GCash</div><div style="font-size:11px;color:var(--gray);">Mobile Wallet</div></div>
+          </div>
+
+          <div class="pay-method" data-method="paymaya" onclick="selectMethod(this,'paymaya')"
+            style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:white;cursor:pointer;transition:all .2s;">
+            <div style="width:38px;height:38px;border-radius:10px;background:#00b900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:white;font-weight:900;font-size:14px;">M</span>
+            </div>
+            <div><div style="font-size:13px;font-weight:700;">Maya</div><div style="font-size:11px;color:var(--gray);">Mobile Wallet</div></div>
+          </div>
+
+          <div class="pay-method" data-method="card" onclick="selectMethod(this,'card')"
+            style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:white;cursor:pointer;transition:all .2s;">
+            <div style="width:38px;height:38px;border-radius:10px;background:#6366f1;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:white;font-size:18px;">💳</span>
+            </div>
+            <div><div style="font-size:13px;font-weight:700;">Credit / Debit</div><div style="font-size:11px;color:var(--gray);">Visa, Mastercard</div></div>
+          </div>
+
+          <div class="pay-method" data-method="grab_pay" onclick="selectMethod(this,'grab_pay')"
+            style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:2px solid var(--border);background:white;cursor:pointer;transition:all .2s;">
+            <div style="width:38px;height:38px;border-radius:10px;background:#00B14F;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <span style="color:white;font-weight:900;font-size:14px;">G</span>
+            </div>
+            <div><div style="font-size:13px;font-weight:700;">GrabPay</div><div style="font-size:11px;color:var(--gray);">E-Wallet</div></div>
+          </div>
+
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--gray);display:flex;align-items:center;gap:6px;">
+          <span>🔒</span> Secure checkout powered by PayMongo.
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;">
+          <span style="color:var(--gray);">Route</span><span style="font-weight:700;">{{ route.name }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;">
+          <span style="color:var(--gray);">From → To</span><span style="font-weight:700;">{{ route.origin }} → {{ route.destination }}</span>
+        </div>
+        <div style="border-top:1px solid var(--border);padding-top:8px;display:flex;justify-content:space-between;font-size:14px;">
+          <span style="font-weight:700;">Total to Pay</span>
+          <span style="font-weight:800;color:var(--green);font-size:1.1rem;">₱{{ route.fare }}</span>
+        </div>
+      </div>
+
+      <!-- Pay Button -->
+      <form method="post" action="{% url 'initiate_payment' route.id %}" id="pay-form">
+        {% csrf_token %}
+        <input type="hidden" name="payment_method" id="payment_method_input" value="gcash">
+        <button type="submit" class="btn btn-green" style="width:100%;justify-content:center;padding:14px;font-size:15px;" id="pay-btn">
+          🔒 Pay ₱{{ route.fare }} via GCash
+        </button>
+      </form>
+      <a href="{% url 'routes' %}" class="btn btn-outline" style="width:100%;justify-content:center;margin-top:.75rem;">← Back to Routes</a>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const labels = {
+  gcash: 'GCash',
+  paymaya: 'Maya',
+  card: 'Credit / Debit Card',
+  grab_pay: 'GrabPay',
+};
+
+function selectMethod(el, method) {
+  document.querySelectorAll('.pay-method').forEach(m => {
+    m.style.border = '2px solid var(--border)';
+  });
+  el.style.border = '2px solid var(--green)';
+  document.getElementById('payment_method_input').value = method;
+  document.getElementById('pay-btn').textContent = '🔒 Pay ₱{{ route.fare }} via ' + labels[method];
+}
+</script>
+{% endblock %}

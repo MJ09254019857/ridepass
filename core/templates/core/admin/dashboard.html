@@ -1,0 +1,129 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+{% block nav_dash %}active{% endblock %}
+{% block content %}
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon blue">👥</div>
+    <div><div class="stat-label">Total Users</div><div class="stat-val">{{ total_users }}</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon green">🎟️</div>
+    <div><div class="stat-label">Total Tickets</div><div class="stat-val">{{ total_tickets }}</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon amber">💰</div>
+    <div><div class="stat-label">Total Revenue</div><div class="stat-val" style="font-size:1.2rem;">₱{{ total_revenue|floatformat:2 }}</div></div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon red">🚌</div>
+    <div><div class="stat-label">Active Routes</div><div class="stat-val">{{ active_routes }}</div></div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+
+  <!-- Recent Users -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">👥 Recent Users</div>
+      <a href="{% url 'admin_users' %}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <table>
+      <thead><tr><th>User</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for u in recent_users %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="user-avatar-sm">{{ u.first_name.0|upper|default:u.username.0|upper }}</div>
+              <div>
+                <div style="font-weight:600;font-size:13px;">{{ u.get_full_name|default:u.username }}</div>
+                <div style="font-size:11px;color:var(--gray);">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:12px;color:var(--gray);">{{ u.date_joined|date:"M d, Y" }}</td>
+          <td>{% if u.is_active %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Banned</span>{% endif %}</td>
+          <td><a href="{% url 'admin_user_edit' u.id %}" class="btn btn-outline btn-sm">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Tickets -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">🎟️ Recent Tickets</div>
+      <a href="{% url 'admin_tickets' %}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <table>
+      <thead><tr><th>User</th><th>Route</th><th>Fare</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for ticket in recent_tickets %}
+        <tr>
+          <td style="font-weight:600;">{{ ticket.user.username }}</td>
+          <td style="font-size:12px;">{{ ticket.route.name }}</td>
+          <td style="font-weight:700;">₱{{ ticket.fare_paid }}</td>
+          <td>
+            {% if ticket.status == 'active' %}<span class="badge badge-green">Active</span>
+            {% elif ticket.status == 'used' %}<span class="badge badge-gray">Used</span>
+            {% elif ticket.status == 'expired' %}<span class="badge badge-amber">Expired</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+
+  <!-- Ticket Status Breakdown -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">📊 Tickets by Status</div></div>
+    <div class="card-body">
+      {% for item in tickets_by_status %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;">
+          {% if item.status == 'active' %}<span class="badge badge-green">Active</span>
+          {% elif item.status == 'used' %}<span class="badge badge-gray">Used</span>
+          {% elif item.status == 'expired' %}<span class="badge badge-amber">Expired</span>
+          {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}
+        </div>
+        <div style="font-weight:800;font-size:16px;">{{ item.count }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Top Routes -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">🏆 Most Used Routes</div></div>
+    <div class="card-body">
+      {% for route in routes_usage %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:600;font-size:13px;">{{ route.name }}</div>
+          <div style="font-size:11px;color:var(--gray);">{{ route.origin }} → {{ route.destination }}</div>
+        </div>
+        <div style="font-weight:800;font-size:15px;color:var(--blue);">{{ route.ticket_count }} <span style="font-size:11px;font-weight:400;color:var(--gray);">tickets</span></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:1.25rem;display:flex;gap:1rem;">
+  <a href="{% url 'admin_users' %}" class="btn btn-blue">👥 Manage Users</a>
+  <a href="{% url 'admin_route_add' %}" class="btn btn-green">+ Add Route</a>
+  <a href="{% url 'admin_tickets' %}" class="btn btn-outline">🎟️ View Tickets</a>
+  <a href="{% url 'admin_transactions' %}" class="btn btn-outline">💳 Transactions</a>
+</div>
+
+{% endblock %}

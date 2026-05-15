@@ -1,0 +1,58 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block nav_routes %}active{% endblock %}
+{% block content %}
+<a href="{% url 'admin_routes' %}" class="btn btn-outline btn-sm" style="margin-bottom:1.25rem;">← Back to Routes</a>
+<div style="max-width:600px;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">🚌 {{ title }}</div></div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Route Name</label>
+          <input type="text" name="name" class="form-input" value="{{ route.name|default:'' }}" placeholder="e.g. CarCanMadCarLan Express" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Origin (From)</label>
+            <input type="text" name="origin" class="form-input" value="{{ route.origin|default:'' }}" placeholder="e.g. Caraga Terminal" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Destination (To)</label>
+            <input type="text" name="destination" class="form-input" value="{{ route.destination|default:'' }}" placeholder="e.g. City Center" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Transport Type</label>
+            <select name="transport_type" class="form-select" required>
+              <option value="bus" {% if route.transport_type == 'bus' %}selected{% endif %}>🚌 Bus</option>
+              <option value="van" {% if route.transport_type == 'van' %}selected{% endif %}>🚐 Van</option>
+              <option value="multicab" {% if route.transport_type == 'multicab' %}selected{% endif %}>🚙 Multicab</option>
+              <option value="motorcycle" {% if route.transport_type == 'motorcycle' %}selected{% endif %}>🏍️ Motorcycle</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fare (₱)</label>
+            <input type="number" name="fare" class="form-input" value="{{ route.fare|default:'' }}" placeholder="0.00" min="1" step="0.01" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration (minutes)</label>
+          <input type="number" name="duration_minutes" class="form-input" value="{{ route.duration_minutes|default:30 }}" min="1" required>
+        </div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="is_active" name="is_active" {% if not route or route.is_active %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--green);">
+          <label for="is_active" class="form-label" style="margin:0;">Route is Active (visible to users)</label>
+        </div>
+        <div style="display:flex;gap:.75rem;margin-top:.5rem;">
+          <button type="submit" class="btn btn-green">💾 Save Route</button>
+          <a href="{% url 'admin_routes' %}" class="btn btn-outline">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

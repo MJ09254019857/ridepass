@@ -1,0 +1,65 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Users{% endblock %}
+{% block page_title %}Manage Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block content %}
+
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+    <input type="text" name="q" class="search-input" placeholder="Search by name, email, username..." value="{{ q }}">
+    <a href="{% url 'admin_users' %}" class="filter-btn {% if not status %}active{% endif %}">All</a>
+    <a href="?status=active{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if status == 'active' %}active{% endif %}">Active</a>
+    <a href="?status=banned{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if status == 'banned' %}active{% endif %}">Banned</a>
+    <button type="submit" class="btn btn-blue btn-sm">Search</button>
+  </form>
+  <span style="font-size:13px;color:var(--gray);margin-left:auto;">{{ users|length }} users found</span>
+</div>
+
+<div class="card">
+  {% if users %}
+  <table>
+    <thead><tr>
+      <th>User</th><th>Email</th><th>Joined</th><th>Wallet</th><th>Tickets</th><th>Status</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div class="user-avatar-sm">{{ u.first_name.0|upper|default:u.username.0|upper }}</div>
+            <div>
+              <div style="font-weight:700;">{{ u.get_full_name|default:u.username }}</div>
+              <div style="font-size:11px;color:var(--gray);">@{{ u.username }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="font-size:12px;">{{ u.email }}</td>
+        <td style="font-size:12px;color:var(--gray);">{{ u.date_joined|date:"M d, Y" }}</td>
+        <td style="font-weight:700;color:var(--green);">
+          ₱{% if u.wallet %}{{ u.wallet.balance|floatformat:2 }}{% else %}0.00{% endif %}
+        </td>
+        <td style="font-weight:600;">{{ u.tickets.count }}</td>
+        <td>
+          {% if u.profile.is_banned %}<span class="badge badge-red">🚫 Banned</span>
+          {% elif u.is_active %}<span class="badge badge-green">✓ Active</span>
+          {% else %}<span class="badge badge-gray">Inactive</span>{% endif %}
+        </td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <a href="{% url 'admin_user_detail' u.id %}" class="btn btn-outline btn-sm">View</a>
+            <a href="{% url 'admin_user_edit' u.id %}" class="btn btn-blue btn-sm">Edit</a>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">👥</div>
+    <div style="font-weight:700;margin-bottom:.4rem;">No users found</div>
+    <div style="font-size:13px;">Try a different search term.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

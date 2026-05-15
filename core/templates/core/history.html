@@ -1,0 +1,24 @@
+{% extends 'core/base.html' %}
+{% block title %}Transaction History – RidePass{% endblock %}
+{% block page_title %}Transaction History{% endblock %}
+{% block nav_history %}active{% endblock %}
+{% block content %}
+{% if transactions %}
+<div class="card">
+  <table>
+    <thead><tr><th>Type</th><th>Description</th><th>Amount</th><th>Date & Time</th></tr></thead>
+    <tbody>
+    {% for tx in transactions %}
+    <tr>
+      <td>{% if tx.transaction_type == 'topup' %}<span class="badge badge-green">💳 Top Up</span>{% else %}<span class="badge badge-blue">🎟️ Purchase</span>{% endif %}</td>
+      <td style="font-size:13px;">{{ tx.description }}</td>
+      <td style="font-weight:800;{% if tx.transaction_type == 'topup' %}color:var(--green);{% else %}color:var(--red);{% endif %}font-size:14px;">{% if tx.transaction_type == 'topup' %}+{% else %}–{% endif %}₱{{ tx.amount|floatformat:2 }}</td>
+      <td style="font-size:12px;color:var(--gray);">{{ tx.created_at|date:"M d, Y g:i A" }}</td>
+    </tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No transactions yet</div><div class="empty-sub">Your wallet and ticket transactions will appear here</div><a href="{% url 'routes' %}" class="btn btn-green">Buy a Ticket</a></div>
+{% endif %}
+{% endblock %}

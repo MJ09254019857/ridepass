@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RidePass — Unified Public Transportation Ticketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2db863;
+    --green-light: #3adf78;
+    --green-pale: #e8f9ef;
+    --blue: #1a6fb5;
+    --blue-deep: #0d4a82;
+    --navy: #0f1e30;
+    --navy-mid: #1a2e44;
+    --slate: #4a6278;
+    --mist: #f4f8fc;
+    --white: #ffffff;
+    --border: #dde8f0;
+    --text-main: #0f1e30;
+    --text-sub: #5a7185;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-main);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* ===== NAV ===== */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 3rem;
+    height: 70px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .logo-img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+  }
+
+  .logo-wordmark {
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--navy);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-wordmark span { color: var(--green); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--slate);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--navy); }
+
+  .nav-cta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .btn-login {
+    padding: 9px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--navy) !important;
+    font-weight: 600 !important;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+    background: white;
+  }
+
+  .btn-login:hover { border-color: var(--green); color: var(--green) !important; }
+
+  .btn-nav-primary {
+    padding: 9px 22px;
+    background: var(--green);
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(45,184,99,0.3);
+  }
+
+  .btn-nav-primary:hover {
+    background: #27a557;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(45,184,99,0.4);
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    position: relative;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(150deg, #f0faf5 0%, #e8f3fc 50%, #f5f0fc 100%);
+  }
+
+  .hero-bg-shapes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .hero-bg-shapes::before {
+    content: '';
+    position: absolute;
+    top: -120px; right: -120px;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(45,184,99,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-bg-shapes::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -80px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(26,111,181,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(26,111,181,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(26,111,181,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 4rem;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    border: 1.5px solid rgba(45,184,99,0.3);
+    border-radius: 100px;
+    padding: 6px 16px 6px 8px;
+    margin-bottom: 1.5rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green);
+    box-shadow: 0 2px 12px rgba(45,184,99,0.12);
+    animation: fadeSlideDown 0.6s ease both;
+  }
+
+  .hero-badge-dot {
+    width: 22px; height: 22px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    color: white;
+  }
+
+  .hero-text h1 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 3.8rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    color: var(--navy);
+    margin-bottom: 1.5rem;
+    animation: fadeSlideUp 0.7s ease 0.1s both;
+  }
+
+  .hero-text h1 .accent { color: var(--green); }
+  .hero-text h1 .accent-blue { color: var(--blue); }
+
+  .hero-text p {
+    font-size: 1.1rem;
+    color: var(--text-sub);
+    line-height: 1.75;
+    max-width: 460px;
+    margin-bottom: 2.5rem;
+    animation: fadeSlideUp 0.7s ease 0.2s both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+    animation: fadeSlideUp 0.7s ease 0.3s both;
+  }
+
+  .btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--green), #1da554);
+    color: white;
+    border-radius: 14px;
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    box-shadow: 0 8px 28px rgba(45,184,99,0.35);
+    transition: all 0.25s;
+  }
+
+  .btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(45,184,99,0.45);
+  }
+
+  .btn-hero-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    background: white;
+    color: var(--navy);
+    border-radius: 14px;
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    transition: all 0.25s;
+  }
+
+  .btn-hero-secondary:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    animation: fadeSlideUp 0.7s ease 0.4s both;
+  }
+
+  .stat-item { text-align: left; }
+  .stat-number {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--navy);
+    line-height: 1;
+  }
+  .stat-number span { color: var(--green); }
+  .stat-label { font-size: 12px; color: var(--text-sub); margin-top: 4px; font-weight: 500; }
+
+  /* ===== HERO VISUAL ===== */
+  .hero-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    animation: fadeSlideLeft 0.8s ease 0.2s both;
+  }
+
+  .phone-mockup {
+    width: 300px;
+    background: var(--navy);
+    border-radius: 40px;
+    padding: 12px;
+    box-shadow: 0 32px 80px rgba(15,30,48,0.3), 0 0 0 1px rgba(255,255,255,0.08);
+    position: relative;
+    z-index: 2;
+  }
+
+  .phone-screen {
+    background: white;
+    border-radius: 30px;
+    overflow: hidden;
+    aspect-ratio: 9/19;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-status {
+    background: var(--navy);
+    padding: 14px 20px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .phone-app-header {
+    background: linear-gradient(135deg, var(--green) 0%, var(--blue-deep) 100%);
+    padding: 20px;
+    color: white;
+  }
+
+  .phone-app-header .app-greeting { font-size: 11px; opacity: 0.8; margin-bottom: 4px; }
+  .phone-app-header .app-name { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 800; }
+
+  .wallet-card {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 14px;
+    backdrop-filter: blur(10px);
+  }
+
+  .wallet-label { font-size: 10px; opacity: 0.7; margin-bottom: 4px; }
+  .wallet-balance { font-family: 'Manrope', sans-serif; font-size: 24px; font-weight: 900; }
+
+  .phone-body {
+    padding: 16px;
+    flex: 1;
+    background: #f8fafc;
+  }
+
+  .phone-section-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+  }
+
+  .ticket-card {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .ticket-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .ticket-icon.green { background: var(--green-pale); }
+  .ticket-icon.blue { background: #e8f0fb; }
+
+  .ticket-route { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700; color: var(--navy); }
+  .ticket-info { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
+  .ticket-price { margin-left: auto; font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 800; color: var(--green); }
+
+  .qr-preview {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .qr-box {
+    width: 48px; height: 48px;
+    background: var(--navy);
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 2px;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+
+  .qr-cell {
+    background: white;
+    border-radius: 1px;
+  }
+
+  .qr-cell.filled { background: var(--navy); }
+
+  .qr-text .qr-label { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 700; color: var(--navy); }
+  .qr-text .qr-sub { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
+
+  /* Float cards around phone */
+  .float-card {
+    position: absolute;
+    background: white;
+    border-radius: 14px;
+    padding: 12px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    border: 1px solid var(--border);
+    z-index: 3;
+    animation: floatBob 3s ease-in-out infinite;
+  }
+
+  .float-card-1 { top: 10%; left: -60px; animation-delay: 0s; }
+  .float-card-2 { bottom: 18%; right: -55px; animation-delay: 1.5s; }
+
+  .float-icon { font-size: 20px; margin-bottom: 4px; }
+  .float-title { font-family: 'Manrope', sans-serif; font-size: 12px; font-weight: 800; color: var(--navy); }
+  .float-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+  /* ===== ROUTES TICKER ===== */
+  .routes-ticker {
+    background: var(--navy);
+    padding: 14px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ticker-track {
+    display: flex;
+    gap: 3rem;
+    animation: ticker 20s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .ticker-dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+
+  /* ===== HOW IT WORKS ===== */
+  .how-it-works {
+    padding: 7rem 3rem;
+    background: white;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 1rem;
+  }
+
+  .section-label::before {
+    content: '';
+    width: 20px;
+    height: 2px;
+    background: var(--green);
+    border-radius: 2px;
+  }
+
+  .section-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: var(--navy);
+    margin-bottom: 1rem;
+    max-width: 550px;
+  }
+
+  .section-sub {
+    color: var(--text-sub);
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 3.5rem;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    position: relative;
+  }
+
+  .steps-grid::before {
+    content: '';
+    position: absolute;
+    top: 36px;
+    left: 60px;
+    right: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    z-index: 0;
+  }
+
+  .step-card {
+    position: relative;
+    z-index: 1;
+    background: var(--mist);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    transition: all 0.3s;
+    border: 1.5px solid transparent;
+  }
+
+  .step-card:hover {
+    background: white;
+    border-color: var(--green);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(45,184,99,0.12);
+  }
+
+  .step-number {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: white;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+  }
+
+  .step-card:hover .step-number {
+    background: var(--green);
+    color: white;
+    border-color: var(--green);
+  }
+
+  .step-emoji { font-size: 1.6rem; margin-bottom: 0.75rem; }
+  .step-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+  .step-desc { font-size: 14px; color: var(--text-sub); line-height: 1.65; }
+
+  /* ===== FEATURES ===== */
+  .features-section {
+    padding: 7rem 3rem;
+    background: linear-gradient(170deg, var(--navy) 0%, var(--navy-mid) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .features-section::before {
+    content: '';
+    position: absolute;
+    top: -200px; right: -200px;
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(45,184,99,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .features-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .features-header { text-align: center; margin-bottom: 4rem; }
+  .features-header .section-label { color: var(--green-light); justify-content: center; }
+  .features-header .section-label::before { background: var(--green-light); }
+  .features-header .section-title { color: white; max-width: 600px; margin: 0 auto 1rem; text-align: center; }
+  .features-header .section-sub { color: rgba(255,255,255,0.55); text-align: center; margin: 0 auto; }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(45,184,99,0.3);
+    transform: translateY(-4px);
+  }
+
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-icon-wrap {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: rgba(45,184,99,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 1.25rem;
+    border: 1px solid rgba(45,184,99,0.2);
+  }
+
+  .feature-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 17px;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.6rem;
+  }
+
+  .feature-card p {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.7;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 4px 12px;
+    background: rgba(45,184,99,0.15);
+    color: var(--green-light);
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== ROUTES ===== */
+  .routes-section {
+    padding: 7rem 3rem;
+    background: var(--mist);
+  }
+
+  .routes-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .routes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .routes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+
+  .route-card {
+    background: white;
+    border-radius: 18px;
+    padding: 1.5rem;
+    border: 1.5px solid var(--border);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .route-card:hover {
+    border-color: var(--green);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(45,184,99,0.1);
+  }
+
+  .route-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .route-mode {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--slate);
+  }
+
+  .route-mode-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--green-pale);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+
+  .route-active {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(45,184,99,0.2);
+  }
+
+  .route-name {
+    font-family: 'Manrope', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+
+  .route-desc { font-size: 13px; color: var(--text-sub); margin-bottom: 1rem; }
+
+  .route-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .route-price {
+    font-family: 'Manrope', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--green);
+  }
+
+  .route-price .currency { font-size: 12px; font-weight: 600; color: var(--text-sub); }
+
+  .btn-route {
+    padding: 8px 16px;
+    background: var(--green-pale);
+    color: var(--green);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  .btn-route:hover { background: var(--green); color: white; }
+
+  /* ===== TESTIMONIALS ===== */
+  .testimonials {
+    padding: 7rem 3rem;
+    background: white;
+  }
+
+  .testimonials-inner { max-width: 1200px; margin: 0 auto; }
+
+  .testimonials-header { text-align: center; margin-bottom: 4rem; }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .testimonial-card {
+    background: var(--mist);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1.5px solid var(--border);
+    transition: all 0.3s;
+  }
+
+  .testimonial-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--green);
+    box-shadow: 0 16px 48px rgba(45,184,99,0.08);
+  }
+
+  .testimonial-stars {
+    color: #f59e0b;
+    font-size: 14px;
+    margin-bottom: 1rem;
+    letter-spacing: 2px;
+  }
+
+  .testimonial-quote {
+    font-size: 15px;
+    color: var(--text-main);
+    line-height: 1.75;
+    margin-bottom: 1.25rem;
+    font-style: italic;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .author-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Manrope', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
+  }
+
+  .author-name { font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; color: var(--navy); }
+  .author-role { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+  /* ===== CTA ===== */
+  .cta-section {
+    padding: 7rem 3rem;
+    background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: -150px; right: -150px;
+    width: 400px; height: 400px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .cta-section::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; left: -100px;
+    width: 350px; height: 350px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .cta-inner { position: relative; z-index: 1; max-width: 620px; margin: 0 auto; }
+
+  .cta-eyebrow {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .cta-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+
+  .cta-sub { color: rgba(255,255,255,0.8); font-size: 1.05rem; line-height: 1.7; margin-bottom: 2.5rem; }
+
+  .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-cta-white {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: white;
+    color: var(--green);
+    border-radius: 14px;
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    transition: all 0.25s;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  }
+
+  .btn-cta-white:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(0,0,0,0.2); }
+
+  .btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    background: transparent;
+    color: white;
+    border-radius: 14px;
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.5);
+    transition: all 0.25s;
+  }
+
+  .btn-cta-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: var(--navy);
+    color: rgba(255,255,255,0.5);
+    padding: 4rem 3rem 2rem;
+  }
+
+  .footer-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .footer-brand .logo-wordmark { margin-top: 12px; margin-bottom: 1rem; color: white; font-size: 20px; }
+  .footer-brand p { font-size: 14px; line-height: 1.7; max-width: 260px; }
+
+  .footer-col h4 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.9);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 1.25rem;
+  }
+
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 0.75rem; }
+  .footer-col ul li a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+  .footer-col ul li a:hover { color: var(--green); }
+
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-bottom a { color: var(--green); text-decoration: none; }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideLeft {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes floatBob {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ===== TRUST BADGE STRIP ===== */
+  .trust-strip {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-sub);
+    font-weight: 500;
+  }
+
+  .trust-item .trust-icon { font-size: 16px; }
+
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+    .hero-text h1 { font-size: 2.6rem; }
+    .hero-text p { margin: 0 auto 2rem; }
+    .hero-actions { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .hero-visual { display: none; }
+    .steps-grid { grid-template-columns: 1fr 1fr; }
+    .steps-grid::before { display: none; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .routes-grid { grid-template-columns: 1fr 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <!-- Placeholder logo circle since we can't embed the actual image file -->
+    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#2db863,#1a6fb5);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;color:white;font-size:18px;">R</div>
+    <div class="logo-wordmark">Ride<span>Pass</span></div>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#routes">Routes</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-cta">
+    <a href="{% url 'login' %}" class="btn-login">Log In</a>
+    <a href="{% url 'register' %}" class="btn-nav-primary">🎟️ Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-shapes"></div>
+  <div class="hero-grid-overlay"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <div class="hero-badge-dot">✓</div>
+        Now live on CarCanMadCarLan & Maharlika routes
+      </div>
+      <h1>Commute Smarter.<br><span class="accent">Ride</span> <span class="accent-blue">Cashless.</span></h1>
+      <p>RidePass is your all-in-one digital ticketing wallet for buses, vans, multicabs, and motorcycles across Caraga. Buy, scan, and board — no cash, no hassle.</p>
+      <div class="hero-actions">
+        <a href="{% url 'register' %}" class="btn-hero-primary">🎟️ Buy Your Pass</a>
+        <a href="{% url 'login' %}" class="btn-hero-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Log In
+        </a>
+      </div>
+
+    </div>
+
+    <!-- PHONE MOCKUP -->
+    <div class="hero-visual">
+      <div class="float-card float-card-1">
+        <div class="float-icon">⚡</div>
+        <div class="float-title">Instant Boarding</div>
+        <div class="float-sub">Scan & go in 2 seconds</div>
+      </div>
+
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <div class="phone-status">
+            <span>9:41</span><span>● ● ●</span>
+          </div>
+          <div class="phone-app-header">
+            <div class="app-greeting">Good morning, Juan 👋</div>
+            <div class="app-name">My Wallet</div>
+            <div class="wallet-card">
+              <div class="wallet-label">Available Balance</div>
+              <div class="wallet-balance">₱ 245.50</div>
+            </div>
+          </div>
+          <div class="phone-body">
+            <div class="phone-section-title">My Tickets</div>
+            <div class="ticket-card">
+              <div class="ticket-icon green">🚌</div>
+              <div>
+                <div class="ticket-route">Surigao → Tandag</div>
+                <div class="ticket-info">Van · Today, 8:00 AM</div>
+              </div>
+              <div class="ticket-price">₱58</div>
+            </div>
+            <div class="ticket-card">
+              <div class="ticket-icon blue">🚐</div>
+              <div>
+                <div class="ticket-route">Tandag → Bislig</div>
+                <div class="ticket-info">Bus · Tomorrow, 7:00 AM</div>
+              </div>
+              <div class="ticket-price">₱95</div>
+            </div>
+            <div class="phone-section-title" style="margin-top:12px">Your QR Pass</div>
+            <div class="qr-preview">
+              <div class="qr-box">
+                <div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div>
+                <div class="qr-cell"></div><div class="qr-cell filled"></div><div class="qr-cell"></div>
+                <div class="qr-cell filled"></div><div class="qr-cell"></div><div class="qr-cell filled"></div>
+              </div>
+              <div class="qr-text">
+                <div class="qr-label">Scan to Board</div>
+                <div class="qr-sub">Valid · Surigao–Tandag</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card float-card-2">
+        <div class="float-icon">🛡️</div>
+        <div class="float-title">Secure Payment</div>
+        <div class="float-sub">End-to-end encrypted</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="trust-strip">
+  <div class="trust-item"><span class="trust-icon">🔒</span> SSL Encrypted Transactions</div>
+  <div class="trust-item"><span class="trust-icon">📱</span> Works on Any Smartphone</div>
+  <div class="trust-item"><span class="trust-icon">⚡</span> Instant QR Delivery</div>
+  <div class="trust-item"><span class="trust-icon">↩️</span> Easy Top-Up & Refunds</div>
+  <div class="trust-item"><span class="trust-icon">🚌</span> 40+ Routes Available</div>
+</div>
+
+<!-- TICKER -->
+<div class="routes-ticker">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="ticker-dot"></span> Surigao ↔ Tandag</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Bislig</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Butuan ↔ Surigao</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Cagayan de Oro</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Bislig ↔ Davao</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Surigao ↔ Butuan</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Lianga</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Bayugan ↔ Butuan</span>
+    <!-- Duplicate for seamless loop -->
+    <span class="ticker-item"><span class="ticker-dot"></span> Surigao ↔ Tandag</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Bislig</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Butuan ↔ Surigao</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Cagayan de Oro</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Bislig ↔ Davao</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Surigao ↔ Butuan</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Tandag ↔ Lianga</span>
+    <span class="ticker-item"><span class="ticker-dot"></span> Bayugan ↔ Butuan</span>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="section-label">Simple Process</div>
+  <h2 class="section-title">From your phone to the bus in 4 steps</h2>
+  <p class="section-sub">No more waiting in line or scrambling for exact change. RidePass makes commuting seamless from start to finish.</p>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-number">1</div>
+      <div class="step-emoji">📲</div>
+      <div class="step-title">Create an Account</div>
+      <p class="step-desc">Register with your phone number or email. Verified in seconds — no paperwork needed.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">2</div>
+      <div class="step-emoji">💳</div>
+      <div class="step-title">Top Up Your Wallet</div>
+      <p class="step-desc">Load credits via GCash, PayMaya, or bank transfer. Your balance is always ready to use.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">3</div>
+      <div class="step-emoji">🎟️</div>
+      <div class="step-title">Buy a Digital Ticket</div>
+      <p class="step-desc">Choose your route, select your ride type, and purchase instantly from the app.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-number">4</div>
+      <div class="step-emoji">📸</div>
+      <div class="step-title">Scan & Board</div>
+      <p class="step-desc">Show your QR code when boarding. The conductor scans it — you're good to go.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div class="section-label">Why RidePass</div>
+      <h2 class="section-title">Built for the Filipino commuter</h2>
+      <p class="section-sub">Every feature is designed around the real challenges of commuting in Caraga — from unreliable connectivity to exact-change headaches.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon-wrap">📱</div>
+        <h3>Digital QR Tickets</h3>
+        <p>Your ticket lives in your phone. QR codes are generated instantly and remain valid even without internet after purchase.</p>
+        <span class="feature-tag">Works Offline</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">🚌</div>
+        <h3>Multi-Mode Transit</h3>
+        <p>One wallet, all your rides. Buses, vans, multicabs, and motorcycles — all covered under a single app.</p>
+        <span class="feature-tag">4 Vehicle Types</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">🔒</div>
+        <h3>Secure e-Wallet</h3>
+        <p>Top up with confidence. All transactions are AES-256 encrypted and backed by real-time fraud monitoring.</p>
+        <span class="feature-tag">Bank-Level Security</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">📊</div>
+        <h3>Ride History & Receipts</h3>
+        <p>Track every trip you've taken. Download receipts for reimbursement or personal budgeting at any time.</p>
+        <span class="feature-tag">Full Transparency</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">⚡</div>
+        <h3>Instant Boarding</h3>
+        <p>QR scanning takes under 2 seconds. No fumbling for change, no waiting — just tap, scan, and sit down.</p>
+        <span class="feature-tag">2-Second Boarding</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon-wrap">🎁</div>
+        <h3>Commuter Rewards</h3>
+        <p>Earn points on every ride and redeem them for free tickets or wallet credits. Regular riders get the most back.</p>
+        <span class="feature-tag">Coming Soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROUTES -->
+<section class="routes-section" id="routes">
+  <div class="routes-inner">
+    <div class="routes-header">
+      <div>
+        <div class="section-label">Coverage</div>
+        <h2 class="section-title">Popular Routes</h2>
+        <p class="section-sub">Serving CarCanMadCarLan and Maharlika corridor commuters daily.</p>
+      </div>
+      <a href="{% url 'register' %}" class="btn-nav-primary" style="flex-shrink:0;">View All Routes →</a>
+    </div>
+    <div class="routes-grid">
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🚐</div> Van</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Surigao → Tandag</div>
+        <div class="route-desc">Direct van service via Maharlika Highway. Departs every hour from Surigao Terminal.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>58</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🚌</div> Bus</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Tandag → Bislig</div>
+        <div class="route-desc">Air-conditioned bus service. Multiple daily departures along the coastal route.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>95</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🚐</div> Van</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Butuan → Surigao</div>
+        <div class="route-desc">Express van service connecting Agusan del Norte to Surigao del Norte.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>120</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🛺</div> Multicab</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Tandag City Loop</div>
+        <div class="route-desc">Inner-city multicab routes covering Tandag proper, Awasian, and Telaje.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>12</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🚌</div> Bus</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Bislig → Davao</div>
+        <div class="route-desc">Long-haul bus service from Bislig City to Davao. Overnight option available.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>280</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+      <div class="route-card">
+        <div class="route-header">
+          <div class="route-mode"><div class="route-mode-icon">🏍️</div> Motorcycle</div>
+          <div class="route-active"></div>
+        </div>
+        <div class="route-name">Lianga → Tandag</div>
+        <div class="route-desc">Habal-habal service for routes with limited van coverage. Book in advance.</div>
+        <div class="route-footer">
+          <div class="route-price"><span class="currency">₱ </span>45</div>
+          <a href="{% url 'register' %}" class="btn-route">Buy Ticket</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="testimonials-inner">
+    <div class="testimonials-header">
+      <div class="section-label">Real Commuters</div>
+      <h2 class="section-title" style="margin:0 auto 0.75rem;text-align:center;max-width:100%;">What riders are saying</h2>
+      <p class="section-sub" style="text-align:center;margin:0 auto;">Thousands of commuters across Caraga now travel smarter with RidePass.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Hindi na ko naghahanap ng barya. Basta mag-scan lang tapos sakay na. Sobrang gaan ng buhay commuter ko ngayon!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#2db863,#1a6fb5);">MR</div>
+          <div>
+            <div class="author-name">Maria Reyes</div>
+            <div class="author-role">Daily commuter, Tandag City</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"As a student na madalas mag-van Surigao papuntang Tandag, RidePass saved me so much time. The QR scan is super fast!"</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">JC</div>
+          <div>
+            <div class="author-name">Juan Carlo Santos</div>
+            <div class="author-role">College student, Surigao City</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★☆</div>
+        <p class="testimonial-quote">"As a van operator, mas mabilis na ang boarding. Walang nagtatalo sa sukli. Maganda sana kung mas marami pang routes."</p>
+        <div class="testimonial-author">
+          <div class="author-avatar" style="background:linear-gradient(135deg,#1a6fb5,#7c3aed);">RA</div>
+          <div>
+            <div class="author-name">Rolando Aguilar</div>
+            <div class="author-role">Van operator, Tandag–Bislig route</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="pricing">
+  <div class="cta-inner">
+    <div class="cta-eyebrow">🎟️ Free to Register</div>
+    <h2 class="cta-title">Ready to ride the smarter way?</h2>
+    <p class="cta-sub">Join thousands of commuters who've already ditched the coins. Create your free account in under a minute and start riding cashless today.</p>
+    <div class="cta-actions">
+      <a href="{% url 'register' %}" class="btn-cta-white">
+        🚀 Create Free Account
+      </a>
+      <a href="{% url 'login' %}" class="btn-cta-outline">
+        Already have an account? Log In
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2db863,#1a6fb5);display:flex;align-items:center;justify-content:center;font-family:'Manrope',sans-serif;font-weight:900;color:white;font-size:16px;">R</div>
+        <div class="logo-wordmark">Ride<span>Pass</span></div>
+      </div>
+      <p style="margin-top:1rem;">Unified Public Transportation Ticketing for Caraga. Scan, ride, and repeat — anytime, anywhere.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <ul>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Routes</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Download App</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Refund Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 <a href="#">RidePass</a> — Unified Public Transportation Ticketing</span>
+    <span>Made with ❤️ by <a href="#">Acedera, Oval, Urtua</a> · Caraga, Philippines</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard – RidePass{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block content %}
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-icon green">💰</div><div><div class="stat-label">Wallet Balance</div><div class="stat-val" style="color:var(--green)">₱{{ wallet.balance|floatformat:2 }}</div></div></div>
+  <div class="stat-card"><div class="stat-icon blue">🎟️</div><div><div class="stat-label">Active Tickets</div><div class="stat-val">{{ active_count }}</div></div></div>
+  <div class="stat-card"><div class="stat-icon amber">🚌</div><div><div class="stat-label">Total Rides</div><div class="stat-val">{{ total_rides }}</div></div></div>
+  <div class="stat-card"><div class="stat-icon red">💸</div><div><div class="stat-label">Total Spent</div><div class="stat-val">₱{{ total_spent|floatformat:2 }}</div></div></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">🎟️ Recent Tickets</div><a href="{% url 'my_tickets' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if tickets %}
+    <table><thead><tr><th>Route</th><th>Status</th><th>Fare</th></tr></thead><tbody>
+    {% for ticket in tickets %}
+    <tr>
+      <td><a href="{% url 'ticket_detail' ticket.id %}" style="color:var(--dark);text-decoration:none;font-weight:600;">{{ ticket.route.name }}</a><div style="font-size:11px;color:var(--gray);">{{ ticket.purchased_at|date:"M d, Y" }}</div></td>
+      <td>{% if ticket.status == 'active' %}<span class="badge badge-green">Active</span>{% elif ticket.status == 'used' %}<span class="badge badge-gray">Used</span>{% elif ticket.status == 'expired' %}<span class="badge badge-amber">Expired</span>{% else %}<span class="badge badge-red">Cancelled</span>{% endif %}</td>
+      <td style="font-weight:700;">₱{{ ticket.fare_paid }}</td>
+    </tr>{% endfor %}</tbody></table>
+    {% else %}<div class="empty-state"><div class="empty-icon">🎟️</div><div class="empty-title">No tickets yet</div><div class="empty-sub">Purchase your first ticket to get started</div><a href="{% url 'routes' %}" class="btn btn-green">Browse Routes</a></div>{% endif %}
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">📋 Recent Transactions</div><a href="{% url 'history' %}" class="btn btn-outline btn-sm">View All</a></div>
+    {% if transactions %}
+    <table><thead><tr><th>Description</th><th>Amount</th></tr></thead><tbody>
+    {% for tx in transactions %}
+    <tr>
+      <td><span>{% if tx.transaction_type == 'topup' %}💳{% else %}🎟️{% endif %}</span><span style="margin-left:6px;font-size:13px;">{{ tx.description|truncatechars:32 }}</span><div style="font-size:11px;color:var(--gray);padding-left:22px;">{{ tx.created_at|date:"M d, Y g:i A" }}</div></td>
+      <td style="font-weight:700;{% if tx.transaction_type == 'topup' %}color:var(--green);{% else %}color:var(--red);{% endif %}">{% if tx.transaction_type == 'topup' %}+{% else %}–{% endif %}₱{{ tx.amount }}</td>
+    </tr>{% endfor %}</tbody></table>
+    {% else %}<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No transactions yet</div><div class="empty-sub">Buy a ticket to get started</div><a href="{% url 'routes' %}" class="btn btn-green">Browse Routes</a></div>{% endif %}
+  </div>
+</div>
+<div style="margin-top:1.2rem;display:flex;gap:1rem;flex-wrap:wrap;">
+  <a href="{% url 'routes' %}" class="btn btn-green">🚌 Buy a Ticket</a>
+  <a href="{% url 'my_tickets' %}" class="btn btn-outline">🎟️ My Tickets</a>
+  <a href="{% url 'scan' %}" class="btn btn-outline">📷 Scan Ticket</a>
+</div>
+{% endblock %}

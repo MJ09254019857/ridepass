@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}RidePass{% endblock %}</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--green:#3aaf5c;--green-dark:#2a8f46;--green-light:#e8f8ee;--blue:#1a6fb5;--blue-light:#e8f2fb;--red:#ef4444;--red-light:#fef2f2;--amber:#f59e0b;--amber-light:#fffbeb;--dark:#1a2332;--gray:#6b7280;--light:#f4f6f9;--white:#fff;--border:#e5e7eb;--sidebar-w:240px;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);color:var(--dark);display:flex;min-height:100vh;}
+.sidebar{width:var(--sidebar-w);background:var(--dark);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.sidebar-logo{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.sidebar-logo-icon{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;flex-shrink:0;}
+.sidebar-logo-text{font-size:18px;font-weight:800;color:white;}.sidebar-logo-text span{color:#6ee89e;}
+.sidebar-logo-sub{font-size:9px;color:rgba(255,255,255,.4);display:block;}
+.nav-section{padding:1rem .75rem .25rem;}.nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);padding:0 .75rem;margin-bottom:.5rem;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;text-decoration:none;color:rgba(255,255,255,.65);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;position:relative;}
+.nav-link:hover{background:rgba(255,255,255,.07);color:white;}.nav-link.active{background:var(--green);color:white;}
+.nav-link .icon{font-size:15px;width:20px;text-align:center;}
+.notif-badge{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:#ef4444;color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;}
+.sidebar-bottom{margin-top:auto;padding:.75rem;border-top:1px solid rgba(255,255,255,.08);}
+.user-block{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.06);margin-bottom:6px;}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+.user-name{font-size:13px;font-weight:600;color:white;}.user-email{font-size:11px;color:rgba(255,255,255,.45);}
+.logout-btn{width:100%;padding:8px;background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;display:block;text-align:center;}
+.main-content{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+.topbar{background:white;border-bottom:1px solid var(--border);padding:0 1.75rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.page-title{font-size:15px;font-weight:700;}.topbar-right{display:flex;align-items:center;gap:.75rem;}
+.wallet-badge{display:flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;text-decoration:none;}
+.notif-btn{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;text-decoration:none;font-size:18px;color:var(--gray);}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid white;}
+.page-body{padding:1.75rem;flex:1;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:white;border-radius:14px;border:1px solid var(--border);padding:1.25rem;display:flex;align-items:center;gap:1rem;}
+.stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.stat-icon.green{background:var(--green-light);}.stat-icon.blue{background:var(--blue-light);}.stat-icon.amber{background:var(--amber-light);}.stat-icon.red{background:var(--red-light);}
+.stat-label{font-size:11px;color:var(--gray);margin-bottom:3px;}.stat-val{font-size:1.5rem;font-weight:800;}
+.card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+.card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:14px;font-weight:700;}.card-body{padding:1.5rem;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:0 1rem 10px;text-align:left;}
+td{padding:11px 1rem;font-size:13px;border-top:1px solid var(--border);vertical-align:middle;}
+tr:hover td{background:#fafafa;}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-green{background:var(--green-light);color:var(--green-dark);}.badge-gray{background:#f3f4f6;color:var(--gray);}
+.badge-red{background:var(--red-light);color:var(--red);}.badge-amber{background:var(--amber-light);color:#92400e;}.badge-blue{background:var(--blue-light);color:var(--blue);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:none;transition:all .15s;}
+.btn-green{background:var(--green);color:white;}.btn-green:hover{background:var(--green-dark);}
+.btn-red{background:var(--red);color:white;}.btn-outline{background:white;color:var(--dark);border:1.5px solid var(--border);}
+.btn-outline:hover{border-color:var(--green);color:var(--green);}.btn-sm{padding:5px 12px;font-size:12px;}
+.alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:1.2rem;}
+.alert-success{background:var(--green-light);color:var(--green-dark);border:1px solid rgba(58,175,92,.3);}
+.alert-error{background:var(--red-light);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+.empty-state{text-align:center;padding:3rem;}.empty-icon{font-size:2.5rem;margin-bottom:.75rem;}.empty-title{font-size:16px;font-weight:700;margin-bottom:.4rem;}.empty-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+.form-group{margin-bottom:1.1rem;}.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;}
+.form-input,.form-select{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;outline:none;background:var(--light);}
+.form-input:focus,.form-select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,175,92,.1);background:white;}
+.quick-amounts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+.quick-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;background:white;}
+.quick-btn:hover{border-color:var(--green);color:var(--green);}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="{% url 'landing' %}" class="sidebar-logo">
+    <div class="sidebar-logo-icon">R</div>
+    <div><div class="sidebar-logo-text">Ride<span>Pass</span></div><span class="sidebar-logo-sub">Public Transport Ticketing</span></div>
+  </a>
+  <div class="nav-section">
+    <div class="nav-label">Main</div>
+    <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}"><span class="icon">🏠</span>Dashboard</a>
+    <a href="{% url 'routes' %}" class="nav-link {% block nav_routes %}{% endblock %}"><span class="icon">🚌</span>Buy Tickets</a>
+    <a href="{% url 'my_tickets' %}" class="nav-link {% block nav_tickets %}{% endblock %}"><span class="icon">🎟️</span>My Tickets</a>
+    <a href="{% url 'scan' %}" class="nav-link {% block nav_scan %}{% endblock %}"><span class="icon">📷</span>Scan Ticket</a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a href="{% url 'history' %}" class="nav-link {% block nav_history %}{% endblock %}"><span class="icon">📋</span>History</a>
+    <a href="{% url 'notifications' %}" class="nav-link {% block nav_notif %}{% endblock %}">
+      <span class="icon">🔔</span>Notifications
+      {% if notif_count and notif_count > 0 %}<span class="notif-badge">{{ notif_count }}</span>{% endif %}
+    </a>
+    <a href="{% url 'profile' %}" class="nav-link {% block nav_profile %}{% endblock %}"><span class="icon">👤</span>Profile</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-block">
+      <div class="user-avatar">{{ request.user.first_name.0|upper|default:request.user.username.0|upper }}</div>
+      <div><div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div><div class="user-email">{{ request.user.email }}</div></div>
+    </div>
+    <a href="{% url 'logout' %}" class="logout-btn">🚪 Log Out</a>
+  </div>
+</aside>
+<div class="main-content">
+  <div class="topbar">
+    <div class="page-title">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="topbar-right">
+      <span class="wallet-badge">💰 ₱{% if wallet %}{{ wallet.balance|floatformat:2 }}{% else %}0.00{% endif %}</span>
+      <a href="{% url 'notifications' %}" class="notif-btn">🔔{% if notif_count and notif_count > 0 %}<span class="notif-dot"></span>{% endif %}</a>
+    </div>
+  </div>
+  <div class="page-body">
+    {% if messages %}{% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ message }}</div>
+    {% endfor %}{% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Confirm Delete{% endblock %}
+{% block page_title %}Confirm Delete{% endblock %}
+{% block content %}
+<div style="max-width:440px;margin:2rem auto;">
+  <div class="card" style="border:2px solid var(--red);">
+    <div class="card-body" style="text-align:center;padding:2.5rem;">
+      <div style="font-size:3rem;margin-bottom:1rem;">⚠️</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:.5rem;">Are you sure?</div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:2rem;">
+        You are about to permanently delete <strong>{{ obj }}</strong>.<br>This action cannot be undone.
+      </div>
+      <div style="display:flex;gap:1rem;justify-content:center;">
+        <a href="{{ cancel_url }}" class="btn btn-outline">Cancel</a>
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-red">🗑 Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+{% block title %}Payment Result – RidePass{% endblock %}
+{% block page_title %}Payment Result{% endblock %}
+{% block content %}
+<div style="max-width:480px;">
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding:2.5rem;">
+
+      {% if order.status == "paid" %}
+        <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
+        <div style="font-size:1.2rem;font-weight:800;color:var(--green);margin-bottom:.5rem;">Payment Successful!</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:1.5rem;">Your ticket has been activated and is ready to use.</div>
+        {% if order.ticket %}
+          <a href="{% url 'ticket_detail' order.ticket.id %}" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:14px;">🎟️ View My Ticket</a>
+        {% endif %}
+
+      {% elif order.status == "pending" %}
+        <div style="font-size:3rem;margin-bottom:1rem;">⏳</div>
+        <div style="font-size:1.2rem;font-weight:800;color:var(--amber);margin-bottom:.5rem;">Payment Processing...</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:1.5rem;">Your payment is being confirmed. This page will update automatically.</div>
+        <div style="background:var(--amber-light);border-radius:10px;padding:1rem;margin-bottom:1.5rem;font-size:13px;color:#92400e;">
+          Order #{{ order.pk }} – ₱{{ order.amount_in_pesos|floatformat:2 }} – {{ order.route_name }}
+        </div>
+        <button onclick="checkStatus()" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;" id="check-btn">
+          🔄 Check Payment Status
+        </button>
+        <script>
+          const orderId = {{ order.pk }};
+          function checkStatus() {
+            document.getElementById('check-btn').textContent = 'Checking...';
+            fetch(`/payments/status/${orderId}/`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.status === 'paid' && data.redirect_url) {
+                  window.location.href = data.redirect_url;
+                } else {
+                  document.getElementById('check-btn').textContent = '🔄 Check Again';
+                  alert('Payment not yet confirmed. Please wait a moment.');
+                }
+              })
+              .catch(() => { document.getElementById('check-btn').textContent = '🔄 Check Again'; });
+          }
+          // Auto-check every 5 seconds
+          setInterval(checkStatus, 5000);
+        </script>
+
+      {% else %}
+        <div style="font-size:3rem;margin-bottom:1rem;">❌</div>
+        <div style="font-size:1.2rem;font-weight:800;color:var(--red);margin-bottom:.5rem;">Payment Failed</div>
+        <div style="font-size:13px;color:var(--gray);margin-bottom:1.5rem;">Your payment was not completed. No charges were made.</div>
+        <a href="{% url 'buy_ticket' order.route_id %}" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-bottom:.75rem;">🔄 Try Again</a>
+        <a href="{% url 'routes' %}" class="btn btn-outline" style="width:100%;justify-content:center;">← Back to Routes</a>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endblock %}
