@@ -1,0 +1,103 @@
+{% extends 'core/base.html' %}
+{% block title %}Scan to Pay – RidePass{% endblock %}
+{% block page_title %}Scan to Pay{% endblock %}
+{% block nav_topup %}active{% endblock %}
+{% block content %}
+<div style="max-width:520px;">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">📱 Payment QR Code</div>
+      <span class="badge badge-blue">{{ order.get_payment_method_display }}</span>
+    </div>
+    <div class="card-body" style="text-align:center;">
+      <div style="background:var(--green-light);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:.25rem;">Amount to Pay</div>
+        <div style="font-size:2rem;font-weight:800;color:var(--green-dark);">₱{{ order.amount_in_pesos|floatformat:2 }}</div>
+      </div>
+      
+      {% if order.qr_code_url %}
+      <div style="background:white;border:2px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;display:inline-block;">
+        <img src="{% url 'qr_code_image' order.pk %}" 
+             alt="Payment QR Code" 
+             style="width:200px;height:200px;border-radius:8px;">
+      </div>
+      <p style="font-size:14px;color:var(--gray);margin-bottom:1rem;">
+        Scan this QR code with your {{ order.get_payment_method_display }} app to complete payment
+      </p>
+      {% else %}
+      <div style="background:var(--amber-light);border-radius:10px;padding:1rem;margin-bottom:1.5rem;">
+        <div style="font-size:24px;margin-bottom:.5rem;">⏳</div>
+        <div style="font-size:14px;color:var(--dark);">Generating QR Code...</div>
+        <div style="font-size:12px;color:var(--gray);margin-top:.25rem;">Please wait while we prepare your payment.</div>
+      </div>
+      {% endif %}
+      
+      <div style="background:var(--bg-light);border-radius:10px;padding:1rem;margin-bottom:1.5rem;text-align:left;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:.5rem;">Payment Details</div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:13px;">Reference Number:</span>
+          <span style="font-size:13px;font-weight:600;">{{ order.reference_number|default:"-" }}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;">
+          <span style="font-size:13px;">Mobile Number:</span>
+          <span style="font-size:13px;font-weight:600;">{{ order.mobile_number|default:"-" }}</span>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="{{ order.checkout_url }}" target="_blank" class="btn btn-blue" style="align-items:center;justify-content:center;">
+          🔗 Open Payment Link
+        </a>
+        <a href="{% url 'topup' %}" class="btn btn-outline" style="align-items:center;justify-content:center;">
+          ← New Top-Up
+        </a>
+      </div>
+      
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--blue-light);border-radius:10px;">
+        <div style="font-size:13px;color:var(--blue);font-weight:600;margin-bottom:.5rem;">💡 Payment Instructions</div>
+        <ol style="font-size:12px;color:var(--gray);text-align:left;padding-left:1.2rem;line-height:1.8;">
+          {% if order.payment_method == 'gcash' %}
+          <li>Open your <strong>GCash</strong> app</li>
+          <li>Tap <strong>Scan QR</strong> on the dashboard</li>
+          <li>Scan the QR code above</li>
+          <li>Confirm the payment amount and complete</li>
+          {% elif order.payment_method == 'bank' %}
+          <li>Open your <strong>Bank</strong> app or online banking</li>
+          <li>Select <strong>Pay Bills</strong> or <strong>Transfer</strong></li>
+          <li>Use the reference number: <strong>{{ order.reference_number }}</strong></li>
+          <li>Complete the payment with the exact amount</li>
+          {% elif order.payment_method == 'cash' %}
+          <li>Visit any authorized payment center</li>
+          <li>Show the QR code or reference number</li>
+          <li>Pay the exact amount in cash</li>
+          <li>Keep your receipt for reference</li>
+          {% endif %}
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Auto-refresh to check payment status every 5 seconds
+let checkCount = 0;
+const maxChecks = 60; // Check for 5 minutes max
+
+function checkPaymentStatus() {
+  if (checkCount >= maxChecks) return;
+  checkCount++;
+  
+  fetch('{% url "check_qr_status" order.pk %}')
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'paid') {
+        window.location.href = '{% url "topup_result" order.pk %}?status=success';
+      }
+    })
+    .catch(err => console.log('Status check error:', err));
+}
+
+// Check every 5 seconds
+setInterval(checkPaymentStatus, 5000);
+</script>
+{% endblock %}

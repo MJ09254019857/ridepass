@@ -1,0 +1,39 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Tickets{% endblock %}
+{% block page_title %}Manage Tickets{% endblock %}
+{% block nav_tickets %}active{% endblock %}
+{% block content %}
+<div class="search-bar">
+  <form method="get" style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+    <input type="text" name="q" class="search-input" placeholder="Search by user or route..." value="{{ q }}">
+    <a href="{% url 'admin_tickets' %}" class="filter-btn {% if not filter %}active{% endif %}">All</a>
+    <a href="?status=active{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filter == 'active' %}active{% endif %}">Active</a>
+    <a href="?status=used{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filter == 'used' %}active{% endif %}">Used</a>
+    <a href="?status=cancelled{% if q %}&q={{ q }}{% endif %}" class="filter-btn {% if filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    <button type="submit" class="btn btn-blue btn-sm">Search</button>
+  </form>
+</div>
+<div class="card">
+  {% if tickets %}
+  <table>
+    <thead><tr><th>Code</th><th>User</th><th>Route</th><th>Fare</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+    <tbody>
+      {% for ticket in tickets %}
+      <tr>
+        <td style="font-family:monospace;font-size:12px;color:var(--blue);font-weight:700;">{{ ticket.short_code }}</td>
+        <td><a href="{% url 'admin_user_detail' ticket.user.id %}" style="color:var(--dark);font-weight:600;text-decoration:none;">{{ ticket.user.username }}</a></td>
+        <td style="font-size:12px;">{{ ticket.route.name }}<div style="font-size:11px;color:var(--gray);">{{ ticket.route.origin }} → {{ ticket.route.destination }}</div></td>
+        <td style="font-weight:700;">₱{{ ticket.fare_paid }}</td>
+        <td>{% if ticket.status == 'active' %}<span class="badge badge-green">Active</span>
+            {% elif ticket.status == 'used' %}<span class="badge badge-gray">Used</span>
+            {% elif ticket.status == 'expired' %}<span class="badge badge-amber">Expired</span>
+            {% else %}<span class="badge badge-red">Cancelled</span>{% endif %}</td>
+        <td style="font-size:12px;color:var(--gray);">{{ ticket.purchased_at|date:"M d, Y" }}</td>
+        <td><a href="{% url 'admin_ticket_edit' ticket.id %}" class="btn btn-blue btn-sm">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<div class="empty-state"><div class="empty-icon">🎟️</div><div>No tickets found.</div></div>{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'core/base.html' %}
+{% block title %}Top Up – RidePass{% endblock %}
+{% block page_title %}Top Up Wallet{% endblock %}
+{% block nav_topup %}active{% endblock %}
+{% block content %}
+<div style="max-width:520px;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">💳 Add Money to Your Wallet</div></div>
+    <div class="card-body">
+      <div style="background:linear-gradient(135deg,var(--green-dark),var(--blue));border-radius:14px;padding:1.5rem;color:white;margin-bottom:1.5rem;text-align:center;">
+        <div style="font-size:12px;opacity:.8;margin-bottom:.4rem;">Current Balance</div>
+        <div style="font-size:2.2rem;font-weight:800;">₱{{ wallet.balance|floatformat:2 }}</div>
+      </div>
+      <form method="post" action="{% url 'topup' %}">{% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Quick Amount</label>
+          <div class="quick-amounts">
+            <button type="button" class="quick-btn" onclick="document.getElementById('amount').value=50">₱50</button>
+            <button type="button" class="quick-btn" onclick="document.getElementById('amount').value=100">₱100</button>
+            <button type="button" class="quick-btn" onclick="document.getElementById('amount').value=200">₱200</button>
+            <button type="button" class="quick-btn" onclick="document.getElementById('amount').value=500">₱500</button>
+            <button type="button" class="quick-btn" onclick="document.getElementById('amount').value=1000">₱1,000</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="amount">Amount to Add (₱)</label>
+          <input type="number" id="amount" name="amount" class="form-input" placeholder="0.00" min="50" max="5000" step="0.01" required>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px;">Min ₱50 · Max ₱5,000</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select name="method" class="form-select">
+            <option value="gcash">📱 GCash</option>
+            <option value="bank">🏦 Bank Transfer</option>
+            <option value="cash">💵 Cash Over the Counter</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;">💳 Add Money</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

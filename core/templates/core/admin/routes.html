@@ -1,0 +1,36 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Routes{% endblock %}
+{% block page_title %}Manage Routes{% endblock %}
+{% block nav_routes %}active{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:flex-end;margin-bottom:1.25rem;">
+  <a href="{% url 'admin_route_add' %}" class="btn btn-green">+ Add New Route</a>
+</div>
+<div class="card">
+  <table>
+    <thead><tr><th>Route Name</th><th>From → To</th><th>Type</th><th>Fare</th><th>Duration</th><th>Tickets Sold</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for route in routes %}
+      <tr>
+        <td style="font-weight:700;">{{ route.name }}</td>
+        <td style="font-size:12px;color:var(--gray);">{{ route.origin }} → {{ route.destination }}</td>
+        <td><span class="badge badge-blue">{{ route.get_transport_type_display }}</span></td>
+        <td style="font-weight:800;color:var(--green);">₱{{ route.fare }}</td>
+        <td style="font-size:12px;">{{ route.duration_minutes }} min</td>
+        <td style="font-weight:700;">{{ route.ticket_count }}</td>
+        <td>{% if route.is_active %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Inactive</span>{% endif %}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <a href="{% url 'admin_route_edit' route.id %}" class="btn btn-blue btn-sm">Edit</a>
+            <form method="post" action="{% url 'admin_delete_route' route.id %}" onsubmit="return confirm('Delete route {{ route.name }}?')">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-red btn-sm">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

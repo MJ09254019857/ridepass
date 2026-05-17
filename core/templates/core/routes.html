@@ -1,0 +1,34 @@
+{% extends 'core/base.html' %}
+{% block title %}Buy Tickets – RidePass{% endblock %}
+{% block page_title %}Buy Tickets{% endblock %}
+{% block nav_routes %}active{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+  <a href="{% url 'routes' %}" class="btn {% if not filter %}btn-green{% else %}btn-outline{% endif %} btn-sm">All</a>
+  <a href="{% url 'routes' %}?type=bus" class="btn {% if filter == 'bus' %}btn-green{% else %}btn-outline{% endif %} btn-sm">🚌 Bus</a>
+  <a href="{% url 'routes' %}?type=van" class="btn {% if filter == 'van' %}btn-green{% else %}btn-outline{% endif %} btn-sm">🚐 Van</a>
+  <a href="{% url 'routes' %}?type=multicab" class="btn {% if filter == 'multicab' %}btn-green{% else %}btn-outline{% endif %} btn-sm">🚙 Multicab</a>
+  <a href="{% url 'routes' %}?type=motorcycle" class="btn {% if filter == 'motorcycle' %}btn-green{% else %}btn-outline{% endif %} btn-sm">🏍️ Motorcycle</a>
+</div>
+{% if routes %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+{% for route in routes %}
+<div class="card" style="padding:1.5rem;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+    <span class="badge {% if route.transport_type == 'bus' %}badge-blue{% elif route.transport_type == 'van' %}badge-green{% elif route.transport_type == 'multicab' %}badge-amber{% else %}badge-gray{% endif %}">
+      {% if route.transport_type == 'bus' %}🚌{% elif route.transport_type == 'van' %}🚐{% elif route.transport_type == 'multicab' %}🚙{% else %}🏍️{% endif %} {{ route.get_transport_type_display }}
+    </span>
+    <span style="font-size:12px;color:var(--gray);">⏱ {{ route.duration_minutes }} min</span>
+  </div>
+  <div style="font-size:16px;font-weight:800;color:var(--dark);margin-bottom:.5rem;">{{ route.name }}</div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray);margin-bottom:1.2rem;"><span>{{ route.origin }}</span><span>→</span><span>{{ route.destination }}</span></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-size:1.4rem;font-weight:800;color:var(--green);">₱{{ route.fare }}</div>
+    <a href="{% url 'buy_ticket' route.id %}" class="btn btn-green btn-sm">Buy Ticket</a>
+  </div>
+</div>{% endfor %}
+</div>
+{% else %}
+<div class="empty-state"><div class="empty-icon">🚌</div><div class="empty-title">No routes available</div><div class="empty-sub">Try a different transport type.</div><a href="{% url 'routes' %}" class="btn btn-green">View All Routes</a></div>
+{% endif %}
+{% endblock %}

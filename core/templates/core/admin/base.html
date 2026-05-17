@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Admin Panel{% endblock %} – RidePass</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --green:#3aaf5c;--green-dark:#2a8f46;--green-light:#e8f8ee;
+    --blue:#1a6fb5;--blue-light:#e8f2fb;
+    --red:#ef4444;--red-light:#fef2f2;
+    --amber:#f59e0b;--amber-light:#fffbeb;
+    --dark:#1a2332;--sidebar:#111827;--gray:#6b7280;
+    --light:#f4f6f9;--white:#fff;--border:#e5e7eb;
+    --sidebar-w:250px;
+  }
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--light);color:var(--dark);display:flex;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{width:var(--sidebar-w);background:var(--sidebar);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+  .sidebar-brand{padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+  .brand-icon{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#ef4444,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:white;flex-shrink:0;}
+  .brand-title{font-size:15px;font-weight:700;color:white;line-height:1.2;}
+  .brand-sub{font-size:10px;color:rgba(255,255,255,.4);display:block;}
+  .nav-section{padding:1rem .75rem .25rem;}
+  .nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.3);padding:0 .75rem;margin-bottom:.5rem;}
+  .nav-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;text-decoration:none;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;}
+  .nav-link:hover{background:rgba(255,255,255,.07);color:white;}
+  .nav-link.active{background:rgba(239,68,68,.2);color:#fca5a5;border-left:3px solid #ef4444;}
+  .nav-link .icon{font-size:15px;width:20px;text-align:center;}
+  .sidebar-footer{margin-top:auto;padding:.75rem;border-top:1px solid rgba(255,255,255,.07);}
+  .admin-badge{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.05);margin-bottom:8px;}
+  .admin-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+  .admin-name{font-size:12px;font-weight:600;color:white;}
+  .admin-role{font-size:10px;color:rgba(255,255,255,.4);}
+  .btn-logout-sm{width:100%;padding:8px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:block;text-align:center;transition:background .15s;}
+  .btn-logout-sm:hover{background:rgba(239,68,68,.22);}
+  .view-site{width:100%;padding:7px;background:rgba(58,175,92,.12);color:#6ee89e;border:1px solid rgba(58,175,92,.2);border-radius:7px;font-size:12px;font-weight:600;text-decoration:none;display:block;text-align:center;margin-bottom:6px;}
+
+  /* MAIN */
+  .main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;}
+  .topbar{background:white;border-bottom:1px solid var(--border);padding:0 1.75rem;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+  .topbar-title{font-size:15px;font-weight:700;color:var(--dark);}
+  .topbar-right{display:flex;align-items:center;gap:.75rem;}
+  .page-body{padding:1.75rem;flex:1;}
+
+  /* COMPONENTS */
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+  .stat-card{background:white;border-radius:14px;border:1px solid var(--border);padding:1.25rem;display:flex;align-items:center;gap:1rem;}
+  .stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+  .stat-icon.blue{background:var(--blue-light);}
+  .stat-icon.green{background:var(--green-light);}
+  .stat-icon.amber{background:var(--amber-light);}
+  .stat-icon.red{background:var(--red-light);}
+  .stat-label{font-size:11px;color:var(--gray);font-weight:500;margin-bottom:3px;}
+  .stat-val{font-size:1.5rem;font-weight:800;color:var(--dark);}
+  .card{background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;}
+  .card-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .card-title{font-size:14px;font-weight:700;color:var(--dark);}
+  .card-body{padding:1.5rem;}
+  table{width:100%;border-collapse:collapse;}
+  th{font-size:11px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;padding:0 1rem 10px;text-align:left;white-space:nowrap;}
+  td{padding:11px 1rem;font-size:13px;border-top:1px solid var(--border);vertical-align:middle;}
+  tr:hover td{background:#fafafa;}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+  .badge-green{background:var(--green-light);color:var(--green-dark);}
+  .badge-gray{background:#f3f4f6;color:var(--gray);}
+  .badge-red{background:var(--red-light);color:var(--red);}
+  .badge-amber{background:var(--amber-light);color:#92400e;}
+  .badge-blue{background:var(--blue-light);color:var(--blue);}
+  .badge-dark{background:#1f2937;color:#e5e7eb;}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:none;transition:all .15s;}
+  .btn-green{background:var(--green);color:white;}.btn-green:hover{background:var(--green-dark);}
+  .btn-blue{background:var(--blue);color:white;}.btn-blue:hover{background:#155a9a;}
+  .btn-red{background:var(--red);color:white;}.btn-red:hover{background:#dc2626;}
+  .btn-amber{background:var(--amber);color:white;}.btn-amber:hover{background:#d97706;}
+  .btn-outline{background:white;color:var(--dark);border:1.5px solid var(--border);}.btn-outline:hover{border-color:var(--green);color:var(--green);}
+  .btn-sm{padding:5px 12px;font-size:12px;}
+  .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:1.2rem;}
+  .alert-success{background:var(--green-light);color:var(--green-dark);border:1px solid rgba(58,175,92,.3);}
+  .alert-error{background:var(--red-light);color:var(--red);border:1px solid rgba(239,68,68,.3);}
+  .form-group{margin-bottom:1.1rem;}
+  .form-label{display:block;font-size:13px;font-weight:600;color:var(--dark);margin-bottom:5px;}
+  .form-input,.form-select,.form-textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;background:var(--light);}
+  .form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,111,181,.1);background:white;}
+  .form-textarea{min-height:80px;resize:vertical;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .search-bar{display:flex;gap:.75rem;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap;}
+  .search-input{padding:9px 14px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;outline:none;background:white;min-width:220px;}
+  .search-input:focus{border-color:var(--blue);}
+  .filter-btn{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:white;color:var(--gray);text-decoration:none;transition:all .15s;}
+  .filter-btn:hover,.filter-btn.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+  .empty-state{text-align:center;padding:3rem;color:var(--gray);}
+  .empty-icon{font-size:2.5rem;margin-bottom:.75rem;}
+  .section-title{font-size:13px;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+  .user-avatar-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:white;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">⚙</div>
+    <div>
+      <div class="brand-title">RidePass Admin</div>
+      <span class="brand-sub">Management Panel</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a href="{% url 'admin_dashboard' %}" class="nav-link {% block nav_dash %}{% endblock %}"><span class="icon">📊</span>Dashboard</a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Manage</div>
+    <a href="{% url 'admin_users' %}" class="nav-link {% block nav_users %}{% endblock %}"><span class="icon">👥</span>Users</a>
+    <a href="{% url 'admin_routes' %}" class="nav-link {% block nav_routes %}{% endblock %}"><span class="icon">🚌</span>Routes</a>
+    <a href="{% url 'admin_tickets' %}" class="nav-link {% block nav_tickets %}{% endblock %}"><span class="icon">🎟️</span>Tickets</a>
+    <a href="{% url 'admin_transactions' %}" class="nav-link {% block nav_txs %}{% endblock %}"><span class="icon">💳</span>Transactions</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="admin-badge">
+      <div class="admin-avatar">{{ request.user.first_name.0|upper|default:request.user.username.0|upper }}</div>
+      <div>
+        <div class="admin-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="admin-role">Administrator</div>
+      </div>
+    </div>
+    <a href="{% url 'landing' %}" class="view-site" target="_blank">🌐 View Site</a>
+    <a href="{% url 'logout' %}" class="btn-logout-sm">🚪 Log Out</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+    <div class="topbar-right">
+      <span style="font-size:12px;color:var(--gray);">Logged in as <strong>{{ request.user.username }}</strong></span>
+    </div>
+  </div>
+  <div class="page-body">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+</body>
+</html>

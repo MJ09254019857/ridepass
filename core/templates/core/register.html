@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register – RidePass</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--green:#3aaf5c;--green-dark:#2a8f46;--blue:#1a6fb5;--dark:#1a2332;--gray:#6b7280;--light:#f9fafb;--white:#fff;--border:#e5e7eb;--red:#ef4444;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;background:var(--light);display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .card{background:white;border-radius:20px;border:1px solid var(--border);padding:2.5rem;width:100%;max-width:440px;}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;justify-content:center;}
+  .logo-icon{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:white;}
+  .logo-name{font-size:22px;font-weight:800;color:var(--dark);}
+  .logo-name span{color:var(--green);}
+  h1{font-size:22px;font-weight:800;margin-bottom:.3rem;}
+  .sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem;}
+  .alert{background:#fef2f2;border:1px solid #fecaca;color:var(--red);padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem;}
+  .fg{margin-bottom:1rem;}
+  label{display:block;font-size:13px;font-weight:600;color:var(--dark);margin-bottom:5px;}
+  input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;color:var(--dark);outline:none;transition:border-color .2s;background:var(--light);}
+  input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(58,175,92,.12);background:white;}
+  .btn{width:100%;padding:13px;background:var(--green);color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:.5rem;}
+  .btn:hover{background:var(--green-dark);}
+  .link{text-align:center;font-size:13px;color:var(--gray);margin-top:1.2rem;}
+  .link a{color:var(--green);font-weight:700;text-decoration:none;}
+  .back{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--gray);text-decoration:none;margin-bottom:1.2rem;}
+</style>
+</head>
+<body>
+<div class="card">
+  <a href="/" class="back">← Back to Home</a>
+  <div class="logo"><div class="logo-icon">R</div><div class="logo-name">Ride<span>Pass</span></div></div>
+  <h1>Create your account</h1>
+  <p class="sub">Start riding smarter today — it's free</p>
+  {% if messages %}{% for message in messages %}<div class="alert">{{ message }}</div>{% endfor %}{% endif %}
+  <form method="post" action="{% url 'register' %}">{% csrf_token %}
+    <div class="fg"><label>Full Name</label><input type="text" name="full_name" placeholder="Juan dela Cruz" required></div>
+    <div class="fg"><label>Email Address</label><input type="email" name="email" placeholder="you@example.com" required></div>
+    <div class="fg"><label>Password</label><input type="password" name="password" placeholder="Create a password" required></div>
+    <button type="submit" class="btn">Create Account</button>
+  </form>
+  <div class="link">Already have an account? <a href="{% url 'login' %}">Log In</a></div>
+</div>
+</body>
+</html>

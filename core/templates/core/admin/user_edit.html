@@ -1,0 +1,182 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Edit User{% endblock %}
+{% block page_title %}Edit User – {{ u.username }}{% endblock %}
+{% block nav_users %}active{% endblock %}
+{% block content %}
+
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:1.5rem;">
+  <a href="{% url 'admin_users' %}" class="btn btn-outline btn-sm">← Back to Users</a>
+  <a href="{% url 'admin_user_detail' u.id %}" class="btn btn-outline btn-sm">👁 View Profile</a>
+  <form method="post" action="{% url 'admin_delete_user' u.id %}" style="margin-left:auto;" onsubmit="return confirm('Permanently delete this user? This cannot be undone.')">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-red btn-sm">🗑 Delete User</button>
+  </form>
+</div>
+
+<!-- User Header -->
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="card-body" style="display:flex;align-items:center;gap:1rem;">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:white;">
+      {{ u.first_name.0|upper|default:u.username.0|upper }}
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:18px;font-weight:800;">{{ u.get_full_name|default:u.username }}</div>
+      <div style="font-size:13px;color:var(--gray);">{{ u.email }} · Joined {{ u.date_joined|date:"M d, Y" }}</div>
+    </div>
+    <div style="display:flex;gap:.75rem;align-items:center;">
+      <div style="text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:var(--green);">₱{{ wallet.balance|floatformat:2 }}</div><div style="font-size:11px;color:var(--gray);">Wallet</div></div>
+      <div style="text-align:center;"><div style="font-size:1.4rem;font-weight:800;">{{ u.tickets.count }}</div><div style="font-size:11px;color:var(--gray);">Tickets</div></div>
+      {% if u.profile.is_banned %}<span class="badge badge-red" style="font-size:13px;padding:6px 14px;">🚫 Banned</span>
+      {% elif u.is_active %}<span class="badge badge-green" style="font-size:13px;padding:6px 14px;">✓ Active</span>
+      {% else %}<span class="badge badge-gray" style="font-size:13px;padding:6px 14px;">Inactive</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+
+  <!-- Edit Info -->
+  <div>
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header"><div class="card-title">✏️ Edit User Information</div></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="edit_info">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-input" value="{{ u.first_name }}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-input" value="{{ u.last_name }}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-input" value="{{ u.email }}">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="text" name="phone" class="form-input" value="{{ profile.phone }}" placeholder="09XX-XXX-XXXX">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <input type="text" name="address" class="form-input" value="{{ profile.address }}" placeholder="Barangay, City">
+            </div>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+            <input type="checkbox" id="is_active" name="is_active" {% if u.is_active %}checked{% endif %} style="width:16px;height:16px;accent-color:var(--green);">
+            <label for="is_active" class="form-label" style="margin:0;">Account is Active</label>
+          </div>
+          <button type="submit" class="btn btn-green">💾 Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Reset Password -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">🔒 Reset Password</div></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reset_password">
+          <div class="form-group">
+            <label class="form-label">New Password for {{ u.username }}</label>
+            <input type="text" name="new_password" class="form-input" placeholder="Enter new password (min 6 chars)" required>
+          </div>
+          <button type="submit" class="btn btn-amber" onclick="return confirm('Reset this user\'s password?')">🔒 Reset Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column -->
+  <div>
+
+    <!-- Wallet Adjustment -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header">
+        <div class="card-title">💰 Wallet Adjustment</div>
+        <span style="font-size:14px;font-weight:800;color:var(--green);">₱{{ wallet.balance|floatformat:2 }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="adjust_wallet">
+          <div class="form-group">
+            <label class="form-label">Operation</label>
+            <select name="operation" class="form-select">
+              <option value="add">➕ Add Money</option>
+              <option value="deduct">➖ Deduct Money</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (₱)</label>
+            <input type="number" name="amount" class="form-input" placeholder="0.00" min="1" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason</label>
+            <input type="text" name="reason" class="form-input" placeholder="e.g. Compensation, Correction..." value="Admin adjustment">
+          </div>
+          <button type="submit" class="btn btn-blue">💳 Apply Adjustment</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Send Notification -->
+    <div class="card" style="margin-bottom:1.25rem;">
+      <div class="card-header"><div class="card-title">📢 Send Notification</div></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="send_notification">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" name="notif_title" class="form-input" value="Message from Admin">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea name="notif_message" class="form-textarea" placeholder="Write your message..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-outline">📢 Send Notification</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Ban / Unban -->
+    <div class="card" style="border:1.5px solid {% if u.profile.is_banned %}var(--green){% else %}var(--red){% endif %};">
+      <div class="card-header" style="background:{% if u.profile.is_banned %}var(--green-light){% else %}var(--red-light){% endif %};">
+        <div class="card-title">{% if u.profile.is_banned %}✅ Reinstate User{% else %}🚫 Ban User{% endif %}</div>
+      </div>
+      <div class="card-body">
+        {% if u.profile.is_banned %}
+          <p style="font-size:13px;color:var(--gray);margin-bottom:.75rem;">
+            This user is currently banned.<br>
+            <strong>Reason:</strong> {{ profile.ban_reason|default:"No reason given" }}
+          </p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="unban_user">
+            <button type="submit" class="btn btn-green">✅ Unban User</button>
+          </form>
+        {% else %}
+          <p style="font-size:13px;color:var(--gray);margin-bottom:.75rem;">Banning will disable this user's account and block access.</p>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="ban_user">
+            <div class="form-group">
+              <label class="form-label">Ban Reason</label>
+              <input type="text" name="ban_reason" class="form-input" placeholder="e.g. Fraudulent activity" required>
+            </div>
+            <button type="submit" class="btn btn-red" onclick="return confirm('Ban this user?')">🚫 Ban User</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

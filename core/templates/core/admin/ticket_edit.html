@@ -1,0 +1,35 @@
+{% extends 'core/admin/base.html' %}
+{% block title %}Edit Ticket{% endblock %}
+{% block page_title %}Edit Ticket{% endblock %}
+{% block nav_tickets %}active{% endblock %}
+{% block content %}
+<a href="{% url 'admin_tickets' %}" class="btn btn-outline btn-sm" style="margin-bottom:1.25rem;">← Back</a>
+<div style="max-width:480px;">
+  <div class="card">
+    <div class="card-header"><div class="card-title">✏️ Edit Ticket Status</div></div>
+    <div class="card-body">
+      <div style="background:var(--light);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+        <div style="font-size:12px;color:var(--gray);margin-bottom:4px;">Ticket Code</div>
+        <div style="font-family:monospace;font-size:18px;font-weight:800;color:var(--blue);margin-bottom:.75rem;">{{ ticket.short_code }}</div>
+        <div style="font-size:13px;"><strong>User:</strong> {{ ticket.user.username }}</div>
+        <div style="font-size:13px;"><strong>Route:</strong> {{ ticket.route.name }}</div>
+        <div style="font-size:13px;"><strong>Fare Paid:</strong> ₱{{ ticket.fare_paid }}</div>
+        <div style="font-size:13px;"><strong>Purchased:</strong> {{ ticket.purchased_at|date:"M d, Y g:i A" }}</div>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="active" {% if ticket.status == 'active' %}selected{% endif %}>Active</option>
+            <option value="used" {% if ticket.status == 'used' %}selected{% endif %}>Used</option>
+            <option value="expired" {% if ticket.status == 'expired' %}selected{% endif %}>Expired</option>
+            <option value="cancelled" {% if ticket.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-green">💾 Update Status</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
