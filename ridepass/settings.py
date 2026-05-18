@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,21 +11,26 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-ridepass-dev-key-2024
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,ridepass.online,www.ridepass.online'
+).split(',')
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.ngrok-free.app",
-    "https://*.ngrok-free.dev",
-    "https://*.ngrok.io",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "https://ridepass.online",
+    "https://www.ridepass.online",
+    "https://*.railway.app",
 ]
-_custom_domain = os.environ.get('CUSTOM_DOMAIN', '')
-if _custom_domain:
-    CSRF_TRUSTED_ORIGINS += [f'https://{_custom_domain}', f'https://www.{_custom_domain}']
+
+CUSTOM_DOMAIN = os.environ.get('CUSTOM_DOMAIN', '')
+if CUSTOM_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{CUSTOM_DOMAIN}')
+    ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Hostinger handles SSL termination
+    SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -75,12 +81,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ridepass.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config(default=DATABASE_URL)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},

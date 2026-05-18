@@ -24,7 +24,10 @@ urlpatterns = [
     path('history/', views.history_view, name='history'),
     path('notifications/', views.notifications_view, name='notifications'),
     path('profile/', views.profile_view, name='profile'),
+<<<<<<< HEAD
     path('topup/', views.topup_view, name='topup'),
+=======
+>>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
     path('scan/', views.scan_view, name='scan'),
 
     # Payments (PayMongo)

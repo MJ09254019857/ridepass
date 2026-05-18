@@ -82,6 +82,7 @@ def retrieve_payment_link(link_id: str) -> dict:
 def get_payment_link_status(link_id: str) -> str:
     """
     Returns the payment status of a link: 'paid', 'pending', 'unpaid', etc.
+<<<<<<< HEAD
     Checks both the link-level status AND the payments array (handles QRPh, GCash, etc.)
     """
     try:
@@ -105,3 +106,14 @@ def get_payment_link_status(link_id: str) -> str:
         return link_status  # "unpaid" or whatever PayMongo returns
     except Exception:
         return "unknown"
+=======
+    """
+    try:
+        data = retrieve_payment_link(link_id)
+        payments = data["attributes"].get("payments", [])
+        if payments:
+            return payments[0]["attributes"].get("status", "pending")
+        return data["attributes"].get("status", "unpaid")
+    except Exception:
+        return "unknown"
+>>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7

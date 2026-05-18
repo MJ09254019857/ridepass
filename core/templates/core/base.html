@@ -71,7 +71,11 @@ tr:hover td{background:#fafafa;}
     <a href="{% url 'dashboard' %}" class="nav-link {% block nav_dashboard %}{% endblock %}"><span class="icon">🏠</span>Dashboard</a>
     <a href="{% url 'routes' %}" class="nav-link {% block nav_routes %}{% endblock %}"><span class="icon">🚌</span>Buy Tickets</a>
     <a href="{% url 'my_tickets' %}" class="nav-link {% block nav_tickets %}{% endblock %}"><span class="icon">🎟️</span>My Tickets</a>
+<<<<<<< HEAD
     {% if request.user.is_staff %}<a href="{% url 'scan' %}" class="nav-link {% block nav_scan %}{% endblock %}"><span class="icon">📷</span>Scan Ticket</a>{% endif %}
+=======
+    <a href="{% url 'scan' %}" class="nav-link {% block nav_scan %}{% endblock %}"><span class="icon">📷</span>Scan Ticket</a>
+>>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
   </div>
   <div class="nav-section">
     <div class="nav-label">Account</div>

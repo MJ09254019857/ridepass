@@ -161,9 +161,12 @@ def profile_view(request):
 
 @login_required
 def scan_view(request):
+<<<<<<< HEAD
     if not request.user.is_staff:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden('Only staff can access this page.')
+=======
+>>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
     scanned_ticket=None; error=None
     if request.method=='POST':
         code=request.POST.get('code','').strip().upper()
@@ -355,6 +358,7 @@ def admin_transactions(request):
     if tf: txs=txs.filter(transaction_type=tf)
     total=txs.aggregate(s=Sum('amount'))['s'] or 0
     return render(request,'core/admin/transactions.html',{'transactions':txs,'q':q,'filter':tf,'total':total})
+<<<<<<< HEAD
 
 
 @login_required
@@ -383,3 +387,5 @@ def topup_view(request):
         'wallet': wallet,
         'notif_count': unread(request.user),
     })
+=======
+>>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
