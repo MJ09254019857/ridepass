@@ -8,14 +8,14 @@ from django.db.models import Sum, Count, Q
 from decimal import Decimal, InvalidOperation
 from .models import Wallet, Route, Ticket, Transaction, Notification, UserProfile
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# -- Helpers ------------------------------------------------------------------
 def get_wallet(user): w,_=Wallet.objects.get_or_create(user=user); return w
 def get_profile(user): p,_=UserProfile.objects.get_or_create(user=user); return p
 def add_notif(user,title,msg,icon='🔔'): Notification.objects.create(user=user,title=title,message=msg,icon=icon)
 def unread(user): return Notification.objects.filter(user=user,is_read=False).count()
 def is_admin(user): return user.is_authenticated and user.is_staff
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# -- Auth ---------------------------------------------------------------------
 def landing(request):
     return render(request,'core/landing.html')
 
@@ -60,7 +60,7 @@ def register_view(request):
             return redirect('login')
     return render(request,'core/register.html')
 
-# ── User Dashboard ────────────────────────────────────────────────────────────
+# -- User Dashboard -----------------------------------------------------------
 @login_required
 def dashboard(request):
     wallet=get_wallet(request.user)
@@ -71,8 +71,6 @@ def dashboard(request):
     total_spent=Transaction.objects.filter(user=request.user,transaction_type='purchase').aggregate(s=Sum('amount'))['s'] or 0
     return render(request,'core/dashboard.html',{'wallet':wallet,'tickets':tickets,'transactions':transactions,
         'total_rides':total_rides,'active_count':active_count,'total_spent':total_spent,'notif_count':unread(request.user)})
-
-
 
 @login_required
 def routes_view(request):
@@ -161,12 +159,9 @@ def profile_view(request):
 
 @login_required
 def scan_view(request):
-<<<<<<< HEAD
     if not request.user.is_staff:
         from django.http import HttpResponseForbidden
         return HttpResponseForbidden('Only staff can access this page.')
-=======
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
     scanned_ticket=None; error=None
     if request.method=='POST':
         code=request.POST.get('code','').strip().upper()
@@ -182,9 +177,34 @@ def scan_view(request):
     return render(request,'core/scan.html',{'scanned_ticket':scanned_ticket,'error':error,
         'wallet':get_wallet(request.user),'notif_count':unread(request.user)})
 
-# ══════════════════════════════════════════════════════════════════════════════
-# ADMIN PANEL VIEWS
-# ══════════════════════════════════════════════════════════════════════════════
+@login_required
+def topup_view(request):
+    wallet = get_wallet(request.user)
+    if request.method == 'POST':
+        try:
+            amount = Decimal(request.POST.get('amount', '0'))
+            if amount < 50 or amount > 5000:
+                messages.error(request, 'Amount must be between ₱50 and ₱5,000.')
+            else:
+                wallet.balance += amount
+                wallet.save()
+                Transaction.objects.create(
+                    user=request.user,
+                    transaction_type='topup',
+                    amount=amount,
+                    description=f"Wallet top-up via {request.POST.get('method', 'GCash')}"
+                )
+                add_notif(request.user, 'Wallet Topped Up', f'₱{amount:,.2f} added to your wallet.', '💰')
+                messages.success(request, f'₱{amount:,.2f} added to your wallet!')
+                return redirect('dashboard')
+        except (InvalidOperation, ValueError):
+            messages.error(request, 'Invalid amount.')
+    return render(request, 'core/topup.html', {
+        'wallet': wallet,
+        'notif_count': unread(request.user),
+    })
+
+# == ADMIN PANEL VIEWS ========================================================
 
 def admin_required(view_func):
     decorated=login_required(user_passes_test(is_admin, login_url='/login/')(view_func))
@@ -207,7 +227,7 @@ def admin_dashboard(request):
         'tickets_by_status':tickets_by_status,'routes_usage':routes_usage,
     })
 
-# ── Admin: Users ──────────────────────────────────────────────────────────────
+# -- Admin: Users -------------------------------------------------------------
 @admin_required
 def admin_users(request):
     q=request.GET.get('q','')
@@ -296,7 +316,7 @@ def admin_delete_user(request,user_id):
         return redirect('admin_users')
     return render(request,'core/admin/confirm_delete.html',{'obj':u,'type':'user','cancel_url':f'/admin-panel/users/{user_id}/edit/'})
 
-# ── Admin: Routes ─────────────────────────────────────────────────────────────
+# -- Admin: Routes ------------------------------------------------------------
 @admin_required
 def admin_routes(request):
     routes=Route.objects.annotate(ticket_count=Count('ticket')).order_by('transport_type')
@@ -332,7 +352,7 @@ def admin_delete_route(request,route_id):
         messages.success(request,f'Route "{name}" deleted.'); return redirect('admin_routes')
     return render(request,'core/admin/confirm_delete.html',{'obj':route,'type':'route','cancel_url':'/admin-panel/routes/'})
 
-# ── Admin: Tickets ────────────────────────────────────────────────────────────
+# -- Admin: Tickets -----------------------------------------------------------
 @admin_required
 def admin_tickets(request):
     sf=request.GET.get('status',''); q=request.GET.get('q','')
@@ -349,7 +369,7 @@ def admin_ticket_edit(request,ticket_id):
         messages.success(request,'Ticket status updated.'); return redirect('admin_tickets')
     return render(request,'core/admin/ticket_edit.html',{'ticket':ticket})
 
-# ── Admin: Transactions ───────────────────────────────────────────────────────
+# -- Admin: Transactions ------------------------------------------------------
 @admin_required
 def admin_transactions(request):
     q=request.GET.get('q',''); tf=request.GET.get('type','')
@@ -358,34 +378,3 @@ def admin_transactions(request):
     if tf: txs=txs.filter(transaction_type=tf)
     total=txs.aggregate(s=Sum('amount'))['s'] or 0
     return render(request,'core/admin/transactions.html',{'transactions':txs,'q':q,'filter':tf,'total':total})
-<<<<<<< HEAD
-
-
-@login_required
-def topup_view(request):
-    wallet = get_wallet(request.user)
-    if request.method == 'POST':
-        try:
-            amount = Decimal(request.POST.get('amount', '0'))
-            if amount < 50 or amount > 5000:
-                messages.error(request, 'Amount must be between ₱50 and ₱5,000.')
-            else:
-                wallet.balance += amount
-                wallet.save()
-                Transaction.objects.create(
-                    user=request.user,
-                    transaction_type='topup',
-                    amount=amount,
-                    description=f"Wallet top-up via {request.POST.get('method', 'GCash')}"
-                )
-                add_notif(request.user, 'Wallet Topped Up', f'₱{amount:,.2f} added to your wallet.', '💰')
-                messages.success(request, f'₱{amount:,.2f} added to your wallet!')
-                return redirect('dashboard')
-        except (InvalidOperation, ValueError):
-            messages.error(request, 'Invalid amount.')
-    return render(request, 'core/topup.html', {
-        'wallet': wallet,
-        'notif_count': unread(request.user),
-    })
-=======
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
