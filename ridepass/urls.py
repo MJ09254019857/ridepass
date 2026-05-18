@@ -24,10 +24,7 @@ urlpatterns = [
     path('history/', views.history_view, name='history'),
     path('notifications/', views.notifications_view, name='notifications'),
     path('profile/', views.profile_view, name='profile'),
-<<<<<<< HEAD
     path('topup/', views.topup_view, name='topup'),
-=======
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
     path('scan/', views.scan_view, name='scan'),
 
     # Payments (PayMongo)
@@ -46,6 +43,7 @@ urlpatterns = [
     path('admin-panel/tickets/', views.admin_tickets, name='admin_tickets'),
     path('admin-panel/tickets/<int:ticket_id>/edit/', views.admin_ticket_edit, name='admin_ticket_edit'),
     path('admin-panel/transactions/', views.admin_transactions, name='admin_transactions'),
+
     # Password Reset
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='core/password_reset.html',
