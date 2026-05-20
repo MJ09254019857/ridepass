@@ -29,7 +29,9 @@
 <body>
 <div class="card">
   <a href="/" class="back">← Back to Home</a>
-  <div class="logo"><div class="logo-icon">R</div><div class="logo-name">Ride<span>Pass</span></div></div>
+  <div class="logo"><img src="{% static 'core/image/Picture1.png' %}" 
+     alt="RidePass Logo" 
+     class="logo-icon"><div class="logo-name">Ride<span>Pass</span></div></div>
   <h1>Create your account</h1>
   <p class="sub">Start riding smarter today — it's free</p>
   {% if messages %}{% for message in messages %}<div class="alert">{{ message }}</div>{% endfor %}{% endif %}
