@@ -3,7 +3,6 @@
 {% block page_title %}Scan Ticket{% endblock %}
 {% block nav_scan %}active{% endblock %}
 {% block content %}
-<<<<<<< HEAD
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <div style="max-width:520px;">
@@ -46,41 +45,22 @@
           <label class="form-label">Ticket Code</label>
           <input type="text" name="code" id="codeInput" class="form-input" placeholder="e.g. E4C66DD0" maxlength="8"
             style="font-family:monospace;font-size:18px;letter-spacing:3px;text-transform:uppercase;" autofocus required>
-=======
-<div style="max-width:520px;">
-  <div class="card" style="margin-bottom:1.2rem;">
-    <div class="card-header"><div class="card-title">📷 Driver – Validate Ticket</div></div>
-    <div class="card-body">
-      <p style="font-size:13px;color:var(--gray);margin-bottom:1.2rem;">Enter the 8-character ticket code shown on the commuter's phone.</p>
-      <form method="post" action="{% url 'scan' %}">{% csrf_token %}
-        <div class="form-group">
-          <label class="form-label">Ticket Code</label>
-          <input type="text" name="code" class="form-input" placeholder="e.g. E4C66DD0" maxlength="8" style="font-family:monospace;font-size:18px;letter-spacing:3px;text-transform:uppercase;" autofocus required>
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
         </div>
         <button type="submit" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:15px;">✅ Validate Ticket</button>
       </form>
     </div>
   </div>
-<<<<<<< HEAD
 
   {% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
 
-=======
-  {% if error %}<div class="alert alert-error">❌ {{ error }}</div>{% endif %}
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
   {% if scanned_ticket %}
   <div class="card" style="border:2px solid var(--green);">
     <div style="background:var(--green);padding:1rem 1.5rem;display:flex;align-items:center;gap:10px;">
       <span style="font-size:24px;">✅</span>
-<<<<<<< HEAD
       <div>
         <div style="color:white;font-weight:800;font-size:16px;">Ticket Valid!</div>
         <div style="color:rgba(255,255,255,.8);font-size:12px;">Passenger may board</div>
       </div>
-=======
-      <div><div style="color:white;font-weight:800;font-size:16px;">Ticket Valid!</div><div style="color:rgba(255,255,255,.8);font-size:12px;">Passenger may board</div></div>
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
     </div>
     <div class="card-body">
       <table style="width:100%;">
@@ -90,7 +70,6 @@
         <tr><td style="color:var(--gray);font-size:13px;padding:8px 0;border-top:1px solid var(--border);">Fare Paid</td><td style="font-weight:800;color:var(--green);text-align:right;border-top:1px solid var(--border);">₱{{ scanned_ticket.fare_paid }}</td></tr>
       </table>
     </div>
-<<<<<<< HEAD
   </div>
   {% endif %}
 </div>
@@ -202,8 +181,3 @@ function setStatus(type, msg) {
 window.addEventListener('beforeunload', stopCamera);
 </script>
 {% endblock %}
-=======
-  </div>{% endif %}
-</div>
-{% endblock %}
->>>>>>> ec8d00c2488030d75c13f2ac7edf2962a8b74eb7
