@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,7 +64,9 @@ tr:hover td{background:#fafafa;}
 <body>
 <aside class="sidebar">
   <a href="{% url 'landing' %}" class="sidebar-logo">
-    <div class="sidebar-logo-icon">R</div>
+    <img src="{% static 'core/image/Picture1.png' %}" 
+     alt="RidePass Logo" 
+     class="sidebar-logo-icon">
     <div><div class="sidebar-logo-text">Ride<span>Pass</span></div><span class="sidebar-logo-sub">Public Transport Ticketing</span></div>
   </a>
   <div class="nav-section">
